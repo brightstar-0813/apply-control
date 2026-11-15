@@ -1,0 +1,73 @@
+# apply-control
+
+Control workspace for running job-application sessions with the **BrightStar Bid Bot**
+Chrome extension (source: `C:\brightstar-bid-bot`) through the **Chrome DevTools MCP** server.
+
+Claude operates the bot the way the user does — clicking its popup/window UI and the
+in-page Autofill panel — inside the user's own Chrome profile. When something blocks an
+application, Claude fixes it (answer, Q&A bank, bot code, or skill) and records what it
+learned so the next run goes further.
+
+## Start here
+
+| Need | Skill |
+|------|-------|
+| Attach to Chrome, bind the right profile, reload the extension | `browser-connect` |
+| Know which popup control does what / read bot state | `bot-operate` |
+| Run an apply session end to end | `apply-run` |
+| Something blocked an application | `blocker-fix` |
+| Site-specific behaviour | `site-<name>` (dice, indeed, greenhouse, workday, lever, ashby, jobgether, jobright, himalayas, builtin, other) |
+| A site has no skill yet | copy `templates/site-skill/` (see `blocker-fix`) |
+
+Person data comes from the bot (built-in `profiles.js` or the custom copy in that Chrome profile); `profiles/index.md` maps people → bot profile ids, and `profiles/<id>.md` holds only session settings. Session logs go in `runs/`.
+
+## Hard rules
+
+1. **Act only in the profile the user named.** Bind it first (`browser-connect`). If more
+   than one profile's bot window is open and it's ambiguous, ask.
+   **Enabled profiles: Avash (`Profile 2`, the default when none is named) and Lewis
+   (`Profile 1`) only.** Don't open, read, or touch pages in any other Chrome profile
+   (Carlos, Tools, …) even though the debug connection can see them. Enabling another
+   profile means the user says so and `profiles/index.md` is updated.
+2. **Operate like the user, not around the bot.** Use the bot's own controls. Do not write
+   `chrome.storage` directly or fake bot messages to change state; service-worker
+   `evaluate_script` is for **read-only** diagnostics.
+3. **Submit and Batch mode come from the profile file / user**, never from Claude's judgment.
+   Set **Batch mode** (Generate / Generate + Apply) and **Allow auto submit** exactly as
+   `profiles/<id>.md` or the user says for this session. Never loosen `ats/adapters.js`
+   submit policy or `batch-apply-policy.js` to get past a blocker. Only click **Mark applied**
+   after seeing a real confirmation page.
+4. **Never Start a batch on an unreviewed queue.** After Load from sheet / CSV, show the
+   counts and wait for the user's go (unless the profile file pre-approves the filter).
+5. **Never invent answers** (work authorization, sponsorship, salary, demographics,
+   years of experience, clearances). Use the profile, the Q&A bank, or ask.
+6. **Human-only blockers stop and ask:** CAPTCHA, MFA/OTP you can't read, login walls,
+   identity verification, payment. Leave the tab open. Never bypass bot protection.
+7. **Credentials never go in files** — not in skills, profiles, runs, or commits. Logins live
+   in the Chrome profile. If a password is needed mid-run, ask; use it once; don't record it.
+8. **Pace it.** Respect the bot's cooldowns; stop on rate-limit signals. Default cap is in
+   the profile file.
+9. **Bot code changes** follow `C:\brightstar-bid-bot\.cursor\skills\brightstar-auto-apply\SKILL.md`
+   (layering + safety invariants), then `npm run check && npm test` in that repo, then
+   `reload_extension`. Don't commit there unless the user asks.
+10. **Every blocker leaves a trace:** a line in the run log and, if it's reusable knowledge,
+    an edit to the matching `site-*` skill (or a new one).
+11. **Never apply through LinkedIn** (user decision 2026-11-14). Never select the LinkedIn
+    filter, never open or fill LinkedIn job / Easy Apply pages, never Mark applied a LinkedIn row.
+    At queue review, offer to remove LinkedIn rows before Start. If any apply flow lands on
+    `linkedin.com`, stop that row and skip it. The bot itself never batch-applies LinkedIn rows.
+
+## What applies to which profile
+
+- **Bot code** (incl. Batch mode, Mark applied): one folder, `C:\brightstar-bid-bot`, loaded in
+  Lewis and Avash → both get it once the extension is **reloaded in that profile**.
+- **Bot settings** (sheet URL, filter, Batch mode, Allow auto submit, …): stored per Chrome
+  profile, shared by all bot persons inside it. Set each profile from its `profiles/<id>.md`.
+- **Skills / rules in this workspace**: generic for every profile; limited by rule 1 to the
+  enabled profiles.
+
+## Paths
+
+- Bot repo: `C:\brightstar-bid-bot` (popup: `popup.html`, SW: `background.js`,
+  policy: `ats/adapters.js`, DOM fill: `content/autofill.js`)
+- Bot output: `%USERPROFILE%\Downloads\<sheet-tab or Applications-Name>\[N] - [Company] - [Title]\`

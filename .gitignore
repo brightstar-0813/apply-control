@@ -1,0 +1,11 @@
+.env
+*.local.json
+.claude/settings.local.json
+screenshots/
+node_modules/
+
+# Personal data stays local (sheet URL, candidate names, run logs)
+profiles/*
+!profiles/_template.md
+runs/*
+!runs/README.md

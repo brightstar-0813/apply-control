@@ -1,0 +1,22 @@
+{
+  "mcpServers": {
+    "chrome-devtools": {
+      "command": "cmd",
+      "args": [
+        "/c",
+        "npx",
+        "-y",
+        "chrome-devtools-mcp@1.13.0",
+        "--autoConnect",
+        "--categoryExtensions",
+        "--no-usage-statistics",
+        "--no-performance-crux",
+        "--screenshotFormat=jpeg",
+        "--screenshotMaxWidth=1400",
+        "--workspace=C:\\apply-control",
+        "--workspace=C:\\brightstar-bid-bot",
+        "--workspace=C:\\Users\\Administrator\\Downloads"
+      ]
+    }
+  }
+}
