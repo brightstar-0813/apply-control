@@ -46,7 +46,7 @@ Person data comes from the bot (built-in `profiles.js` or the custom copy in tha
    years of experience, clearances). Use the profile, the Q&A bank, or ask.
    **Standard answers (user-approved, all profiles):** start date = immediately (today);
    salary = lowest value of the posted range, else $150,000/year (≈ $72/h, $12,500/mo);
-   applied/worked here before = No; how did you hear = any option; SMS consent = No.
+   applied/worked here before = No; how did you hear = any option; SMS consent = No (Avash: Yes).
    Details in each `profiles/<id>.md`.
 6. **Human-only blockers stop and ask:** CAPTCHA, MFA/OTP you can't read, login walls,
    identity verification, payment. Leave the tab open. Never bypass bot protection.
