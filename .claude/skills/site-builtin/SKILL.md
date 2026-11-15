@@ -9,11 +9,21 @@ description: How to handle Built In (builtin.com and city sites) jobs with Brigh
 **Batch (Generate + Apply):** bot opens the listing and pauses → Claude finishes. **Login:** optional.
 
 ## Flow
-1. Paused row → job tab → **Apply** → employer ATS (often Greenhouse / Lever / Ashby / Workday).
-2. Continue with the target host's skill (or `site-other`).
-3. **Mark applied ✓** → Start.
+1. Paused row → job tab. Read the location ("Hiring Remotely in <State>") and the eligibility lines
+   (US citizen, Public Trust, clearance) against the bot profile.
+2. **Apply** (`?handler=ApplyRedirect`) sends signed-out users to `?applyRequired=true`, a bottom bar
+   asking for First/Last/Email + **Continue**. That creates a Built In profile, so treat it as a login wall
+   (rule 6): don't submit it without the user's OK.
+3. Instead, find the role on the **employer's own careers page** (company name / "Company website"
+   on the listing → their Careers / Employment page → the ATS link). Example: USAC →
+   `usac.edu/usac/employment` → `usac.bamboohr.com/careers/260`.
+4. Continue with the target host's skill (or `site-other`), using the row folder's files. **Mark applied ✓** → Start.
+5. Not found on the employer's site → leave the listing tab open, note it, and move on
+   (Start twice uses up the row's 3 apply attempts; **Skip** while paused does not).
 
 ## Known blockers
 | Symptom | Class | Fix | Added |
 |---------|-------|-----|-------|
-| | | | |
+| Apply → "applyRequired" name/email bar | H | Employer careers page instead; Built In sign-up only with the user's OK | 2026-11-15 |
+| Bot: "No Next/Submit button detected" on the listing | expected | No adapter. Do the flow above | 2026-11-15 |
+| Listing company is a brand of a larger employer (Spectrum San Diego = SAIC) | A | Search the parent's careers site; SAIC's search didn't turn it up → skipped | 2026-11-15 |
