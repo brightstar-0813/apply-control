@@ -23,3 +23,11 @@ that Chrome profile). The agent reads it live at bind time. No passwords or toke
 ## Notes
 - Sites to skip:
 - Overrides vs the bot profile (only if the user said so):
+
+## Standard application answers (user, 2026-11-15)
+- Available to start: **Immediately** (date fields → today's date).
+- Desired salary: if the job posts a range → **the lowest value** of that range (both ends of a "range" field = that value).
+  No posted range → **$150,000/year** (convert if the form asks: ≈ $72/hour, $12,500/month).
+- "Have you applied here before?" → **No**. "Worked here before?" → **No**.
+- "How did you hear about us?" → any option (e.g. Online Job Board / Job board).
+- SMS / text consent → **No** (never affects consideration).

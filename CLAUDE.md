@@ -43,6 +43,10 @@ Person data comes from the bot (built-in `profiles.js` or the custom copy in tha
    counts and wait for the user's go (unless the profile file pre-approves the filter).
 5. **Never invent answers** (work authorization, sponsorship, salary, demographics,
    years of experience, clearances). Use the profile, the Q&A bank, or ask.
+   **Standard answers (user-approved, all profiles):** start date = immediately (today);
+   salary = lowest value of the posted range, else $150,000/year (≈ $72/h, $12,500/mo);
+   applied/worked here before = No; how did you hear = any option; SMS consent = No.
+   Details in each `profiles/<id>.md`.
 6. **Human-only blockers stop and ask:** CAPTCHA, MFA/OTP you can't read, login walls,
    identity verification, payment. Leave the tab open. Never bypass bot protection.
 7. **Credentials never go in files** — not in skills, profiles, runs, or commits. Logins live

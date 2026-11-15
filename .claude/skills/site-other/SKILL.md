@@ -20,6 +20,7 @@ description: Host → site-skill routing table for BrightStar Bid Bot apply tabs
 | `jobright.ai` | site-jobright | pauses |
 | `himalayas.app` | site-himalayas | pauses |
 | `builtin.com` | site-builtin | pauses |
+| `recruiting.paylocity.com` | site-paylocity | pauses (hand finish) |
 | anything else | this skill | pauses |
 
 (When `blocker-fix` creates a new `site-*` skill, add its host here.)
