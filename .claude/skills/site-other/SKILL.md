@@ -77,6 +77,21 @@ description: Host → site-skill routing table for BrightStar Bid Bot apply tabs
     veteran status, e-signature Full Name. Done = redirect to `my-profile` with "Application Received".
     (SAIC, 2026-11-15)
 
+- **ADP Workforce Now** (`workforcenow.adp.com/mascsr/default/mdf/recruitment/recruitment.html?cid=…&jobId=…`), seen twice
+  (MyComputerCareer, Silotech, 2026-11-15): **Apply** → name / email / mobile → **Continue** → "Get your verification code":
+  pick the **email** radio → code from `SecurityServices_NoReply@adp.com` ("Here's your verification code from ADP"; open the
+  newest one, the preview may hide the code) → Verify.
+  - Steps: Personal Information → Resume → Questions → Voluntary Self-ID → Review → Self-Attest & Submit.
+  - Personal info: Country combobox may be empty; choosing it **clears the address**. Then type Address Line 1 (Google Places),
+    ArrowDown + Enter on the "…Falls Church, VA, USA" suggestion → city/state/zip/county fill. SMS opt-in checkbox: focus + Space.
+  - Resume/attachments: unhide both `input[type=file]` via style, re-snapshot, `upload_file` (resume, then cover letter).
+  - **The sticky Previous / Finish later / Next bar overlaps fields**: scroll the target into the middle before clicking or you
+    hit Previous (answers survive).
+  - Questions: radios + text; desired salary needs **currency USD** too. Self-attest: checkbox (focus + Space) **and** a
+    "Please type your full name" box before Submit.
+  - Done = "Thank You! We have received your application" or "Application Submitted!". An optional **WOTC** tax-credit
+    questionnaire may follow; skip it.
+
 ## When a host repeats
 
 Handled the same host twice → create `site-<name>` from `templates/site-skill/` (`blocker-fix` §3).
