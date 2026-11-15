@@ -46,7 +46,8 @@ Person data comes from the bot (built-in `profiles.js` or the custom copy in tha
 4. **Never Start a batch on an unreviewed queue.** After Load from sheet / CSV, show the
    counts and wait for the user's go (unless the profile file pre-approves the filter).
 5. **Never invent answers** (work authorization, sponsorship, salary, demographics,
-   years of experience, clearances). Use the profile, the Q&A bank, or ask.
+   years of experience, clearances). Use the profile, the Q&A bank, or ask — in Slack by default
+   (`slack-chat`), including any form question that is unclear or has no good-fit option.
    **Standard answers (user-approved, all profiles):** start date = immediately (today);
    salary = lowest value of the posted range, else $150,000/year (≈ $72/h, $12,500/mo);
    applied/worked here before = No; how did you hear = any option; SMS consent = No (Avash: Yes).

@@ -26,7 +26,10 @@ powershell -NoProfile -File scripts/slack-post.ps1 -Text "<message>"
 - What to send:
   - Session start: person, filter, cap, batch mode, submit setting, queue counts.
   - The queue for review (rule 4) when the user isn't at the terminal; wait for "go" in Slack.
-  - Every rule-5 answer you lack, every human-only blocker (rule 6: CAPTCHA, OTP, login), with what
+  - Every rule-5 answer you lack, and any **unclear form question** (ambiguous wording, no option
+    that fits the profile, conflicting profile data): quote the question and its options exactly,
+    say what you'd pick and why, and ask. Slack is the default place to ask, not the terminal.
+  - Every human-only blocker (rule 6: CAPTCHA, OTP, login), with what
     and where ("CAPTCHA on the Workday tab in Avash's Chrome").
   - Stops: cap reached, rate limit, the same failure 3×, session end summary.
   - No chatter for routine progress; the bot already posts Applied ✅ and hand-offs.
