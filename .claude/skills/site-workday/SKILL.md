@@ -15,7 +15,8 @@ for manual panel runs, not the batch.
 
 ## Flow
 1. Job page → Apply → prefer **Apply Manually** over "Autofill with resume".
-2. Sign in / create account for the tenant (email verification = H).
+2. Sign in / create account for the tenant via `slack-chat` → Account walls (Chrome-suggested
+   password; email verification = H, asked in Slack).
 3. My Information → My Experience (resume) → Application Questions → Voluntary Disclosures →
    Self Identify → Review → Submit.
 4. Each step: fill → resolve REQUIRE_USER (profile / Q&A / ask) → Save and Continue.
@@ -24,6 +25,6 @@ for manual panel runs, not the batch.
 ## Known blockers
 | Symptom | Class | Fix | Added |
 |---------|-------|-----|-------|
-| Create account + email verification | H | User verifies (Gmail connector only if user agrees) | 2026-11-13 |
+| Create account + email verification | A/H | Slack "Q create" → Claude signs up with Chrome-suggested password; user clicks the verification link (Gmail connector only if user agrees) | 2026-11-15 |
 | Date / phone format rejected | D | `autofill-workday-format.js`; fix there if repeatable | 2026-11-13 |
 | Save and Continue loops | D | Snapshot red error text; fill the flagged field | 2026-11-13 |

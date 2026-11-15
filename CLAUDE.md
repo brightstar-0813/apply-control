@@ -53,6 +53,10 @@ Person data comes from the bot (built-in `profiles.js` or the custom copy in tha
    Details in each `profiles/<id>.md`.
 6. **Human-only blockers stop and ask:** CAPTCHA, MFA/OTP you can't read, login walls,
    identity verification, payment. Leave the tab open. Never bypass bot protection.
+   **Account sign-up walls on employer ATS** (user decision 2026-11-15): ask in Slack; on
+   "create", Claude signs up with the person's profile email and **Chrome's suggested password**
+   (saved in that profile's Password Manager; Claude never reads, types, or records it).
+   No suggestion offered → the user creates it. See `slack-chat` → Account walls.
 7. **Credentials never go in files** — not in skills, profiles, runs, or commits. Logins live
    in the Chrome profile. If a password is needed mid-run, ask; use it once; don't record it.
 8. **Pace it.** Respect the bot's cooldowns; stop on rate-limit signals. Default cap is in

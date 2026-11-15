@@ -15,6 +15,7 @@ Gather: apply-tab `take_snapshot`, `list_console_messages` (error/warn) on that 
 | Class | Examples | Who fixes |
 |-------|----------|-----------|
 | **H — human only** | CAPTCHA, MFA/OTP not in reach, login wall, ID verification, payment, legal attestations | User. Stop, leave the tab open, say exactly what and where (post it in Slack, `slack-chat`), wait |
+| **W — account wall** | Employer ATS needs sign-up / sign-in | Slack question → Claude creates with Chrome-suggested password, or user does it (`slack-chat` → Account walls) |
 | **A — answer** | Required question unanswered, no matching dropdown option | Claude from profile / Q&A bank; unknown → ask once (Slack `Q<n>`, `slack-chat`), then save to the Q&A bank |
 | **D — DOM/flow** | Field not filled, Next not found, upload missing, wizard loop, step budget hit | Claude finishes by hand now; fix bot code if it repeats |
 | **N — no adapter** | Batch paused on Builtin / Himalayas / Jobright / employer page by design (never LinkedIn) | Claude finishes per site skill → Mark applied → Start |
