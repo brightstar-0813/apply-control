@@ -15,6 +15,7 @@ learned so the next run goes further.
 | Attach to Chrome, bind the right profile, reload the extension | `browser-connect` |
 | Know which popup control does what / read bot state | `bot-operate` |
 | Run an apply session end to end | `apply-run` |
+| One-command start: `/bid <person> <source> [cap]` or `/<person>-<source>-bid [cap]` (avash/lewis × dice, greenhouse, workday, builtin, himalayas, jobright, other, all) | `bid` |
 | Something blocked an application | `blocker-fix` |
 | Site-specific behaviour | `site-<name>` (dice, indeed, greenhouse, workday, lever, ashby, jobgether, jobright, himalayas, builtin, other) |
 | A site has no skill yet | copy `templates/site-skill/` (see `blocker-fix`) |
