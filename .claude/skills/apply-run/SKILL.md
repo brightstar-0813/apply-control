@@ -12,6 +12,9 @@ description: Run a job-application session with BrightStar Bid Bot for an enable
 - Session overrides from the user: filter, cap, submit, batch mode.
 - Log as you go in `runs/YYYY-MM-DD-<id>.md` (format: `runs/README.md`).
 
+Talk to the user through Slack (`slack-chat`): post session start, the queue for review, every
+question and stop; read their replies at every poll. Terminal messages still work too.
+
 ## 1. Preflight (stop and ask on any failure)
 
 1. `browser-connect` → bound bot page, right person, current build (`#batchModeApply` exists).
@@ -40,7 +43,8 @@ description: Run a job-application session with BrightStar Bid Bot for an enable
 ## 3. Run — Batch mode "Generate + Apply"
 
 1. `#batchStart`. Poll `#status` / `#queueNowWorking` every 30–60 s (or the SW read in
-   `bot-operate`). Don't spam tools while ChatGPT is generating.
+   `bot-operate`), and check the Slack tab for new user messages each cycle (`slack-chat`).
+   Don't spam tools while ChatGPT is generating.
 2. Per row the bot builds files, then opens the job and autofills:
    - **Adapter site** (Dice, Greenhouse, Workday, Lever, Ashby, Jobgether, hosted Indeed):
      bot submits, marks Applied, closes the tab, cools down, next row. Spot-check the first few.

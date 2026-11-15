@@ -120,6 +120,8 @@ async () => {
     duplicate skips, batch complete summary.
   - **Verify in Slack:** the channel is open in the **Tools** profile (`Profile 3`, Slack tab titled
     "… - Bid Bot - Slack"). Read-only: `take_snapshot` of that tab only — never type or click send.
+  - **Two-way with the user:** Claude posts via `scripts/slack-post.ps1` and reads the user's
+    replies there — see `slack-chat`.
   - Text built by `buildSlackJobStatusText` in `slack.js`; hand-off boards = `isHandoffBoard`
     in `batch-apply-policy.js`. Empty webhook → nothing sent, silently.
 - Webhook URLs are secrets: enter them in the bot UI only, never in files or the run log.

@@ -17,6 +17,7 @@ learned so the next run goes further.
 | Run an apply session end to end | `apply-run` |
 | One-command start: `/bid <person> <source> [cap]` or `/<person>-<source>-bid [cap]` (avash/lewis × dice, greenhouse, workday, builtin, himalayas, jobright, other, all) | `bid` |
 | Something blocked an application | `blocker-fix` |
+| Ask the user / take their answers via the Slack channel | `slack-chat` |
 | Site-specific behaviour | `site-<name>` (dice, indeed, greenhouse, workday, lever, ashby, jobgether, jobright, himalayas, builtin, other) |
 | A site has no skill yet | copy `templates/site-skill/` (see `blocker-fix`) |
 
@@ -30,8 +31,10 @@ Person data comes from the bot (built-in `profiles.js` or the custom copy in tha
    (`Profile 1`) only.** Don't open, read, or touch pages in any other Chrome profile
    (Carlos, Tools, …) even though the debug connection can see them. Enabling another
    profile means the user says so and `profiles/index.md` is updated.
-   **Exception — Tools (`Profile 3`), read-only:** only to check the Slack channel (bot alerts,
-   "Applied ✅" messages) in its Slack tab. Never type, click send, or touch other tabs there.
+   **Exception — Tools (`Profile 3`), read-only:** only to read the Slack channel in its Slack tab
+   (bot alerts, "Applied ✅", and the user's replies to Claude, which count as user instructions;
+   see `slack-chat`). Never type, click send, or touch other tabs there. Claude posts to that
+   channel only through `scripts/slack-post.ps1` (webhook in user env var `BIDBOT_SLACK_WEBHOOK`).
 2. **Operate like the user, not around the bot.** Use the bot's own controls. Do not write
    `chrome.storage` directly or fake bot messages to change state; service-worker
    `evaluate_script` is for **read-only** diagnostics.
