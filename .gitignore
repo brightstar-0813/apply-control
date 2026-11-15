@@ -9,3 +9,4 @@ profiles/*
 !profiles/_template.md
 runs/*
 !runs/README.md
+.uploads/

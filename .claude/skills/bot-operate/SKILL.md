@@ -24,7 +24,8 @@ Status bar: `#status` (bottom). Read it after every action.
 | Jobs sheet URL | textbox "Jobs sheet URL" + **Save URL** (`#saveJobsSheetUrlBtn`) | From profile file |
 | Capture tab | textbox "Capture tab" | e.g. `US-SF-Jobs` |
 | Load from sheet | `#loadSheetJobsBtn` | Ingests jobs → queue. Never starts |
-| CSV | `#csvFile #csvRefresh #csvPinFile` | |
+| CSV | `#csvFile #csvRefresh #csvPinFile` | Upload = **fresh queue** (old statuses dropped). `upload_file` only reads files under the MCP `--workspace` roots → copy the CSV to `C:\apply-control\.uploads\` (git-ignored). If `#status` doesn't show "Parsing CSV…", dispatch `change` on `#csvFile`. Sources: `C:\brightstar-sf-job-capture\download\jobs_latest.csv` (all boards) — the sheet capture tab may have no Dice jobs |
+| Sheet calls | Apps Script web app | Error "missing listCaptureJobs" → user must redeploy `apps-script/Code.gs` (Deploy → Manage deployments → Edit → New version). "Checking Google Sheet…" stuck > 2 min → requests have no timeout; reload the bot (queue survives) |
 | Source filter | `#filterBuiltin #filterHimalayas #filterGreenhouse #filterDice #filterJobright #filterWorkday #filterEtc`("Other") `#filterAll` (`#filterLinkedIn` exists — never use it, rule 11) | By job **link host**. Hint `#sourceSubmitHint` says what Start will do |
 | Counters | QUEUE / DONE / APPLIED / PENDING / SKIPPED / ERROR | Baseline before, compare after |
 | Output folder | `#outputDir` | Defaults to person sheet tab |
@@ -43,6 +44,11 @@ Status bar: `#status` (bottom). Read it after every action.
 | Queue list | `#queueList`, `#queueSearch`, `#queueNowWorking` | Row actions: open link, Files, Remove (pending only), Retry (error), **Mark applied ✓** (done & not applied), **Apply** |
 | Mark applied ✓ | row button | `mark_queue_job_applied` → sheet Applied + queue `applied`. Use only after a confirmed submission done by hand (Claude/user) |
 | Apply (row) | row button | Manual apply assist for that row (opens job + panel). Non-hosted rows get marked Applied on the sheet when opened — don't use it just to "check" a row |
+
+**Before clicking a source filter:** read `all_us_jobs` and `job_queue` lengths (SW/page, read-only).
+A filter click rebuilds the queue from `all_us_jobs` and saves it. On 2026-11-15 Avash had
+`all_us_jobs = []` with 211 queued rows → the Dice click wiped the queue. popup.js now guards this
+(seeds the master list from the queue), but still check first; if `all_us_jobs` is empty, stop and ask.
 
 Row statuses: `pending`, `running`, `done`, `skipped`, `error` (+ `applied`, `applyAttempted`,
 `applyAttempts` (max 2 per batch), `inactive`, `error` text).

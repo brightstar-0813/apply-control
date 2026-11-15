@@ -24,5 +24,16 @@ description: How to apply on Dice (dice.com) with BrightStar Bid Bot — Easy Ap
 | Job no longer available | J | Bot marks inactive/skipped | 2026-11-13 |
 | "Cover letter missing — regenerate cover" | B | Rebuild the row (cover PDF), then apply | 2026-11-14 |
 
+## Validated 2026-11-15 (Avash, 2/2 submitted, no hand-off)
+- Status trail: `generating row N` → resume JSON (may re-prompt for JD-skill bullets / ATS
+  project-bank retry) → `Downloading …_Resume.pdf` → cover letter → `Appending row to Google Sheet`
+  → `Done row N` → `Dice auto-apply` → upload → `clicking Next` → `Dice (2/12)` re-upload →
+  `submitting (Submit)` → `Cooling down` (~41 s) → next row.
+- ~3.5–5.5 min per job with a reasoning ChatGPT model; poll ~every 2 min, not faster.
+- Verify with the sheet tab (`listRows` → `Applied M/D/YYYY h:mm`, Bid mode `Auto bid`) and the
+  row folder (jd.txt + resume + cover). To cap a run, click **Stop** during the cooldown after
+  the last wanted row is `applied`.
+- Dice jobs come from the CSV (`jobs_latest.csv`); the sheet capture tab may have none.
+
 ## Notes
 - Watch the first 2–3 Dice submits of a session to confirm they really land.

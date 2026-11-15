@@ -30,7 +30,9 @@ description: Run a job-application session with BrightStar Bid Bot for an enable
 3. **LinkedIn rows** (`linkedin.com` links, "LI" in the counts): never applied (CLAUDE.md rule 11).
    Offer to remove them with the row trash before Start so no generation time is spent on them.
 4. Show the user; flag obvious misfits (wrong track, non-US, duplicates) and offer to remove them.
-5. **Wait for "go"** unless the profile pre-approves. Cap = profile value (default 25); for a
+5. **New CSV / sheet load:** check pending rows have no `jobDir` from an older CSV (row numbers
+   get reused; fixed in the bot 2026-11-15, still verify) and that Autofill is still on.
+6. **Wait for "go"** unless the profile pre-approves. Cap = profile value (default 25); for a
    first run on a profile/build, start with 3 and watch each one.
 
 ## 3. Run — Batch mode "Generate + Apply"
