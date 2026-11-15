@@ -63,6 +63,14 @@ Row statuses: `pending`, `running`, `done`, `skipped`, `error` (+ `applied`, `ap
 | API Custom Q&A | `#openaiQaToggle` | AI answers leftover questions |
 | Autofill / Auto Apply / Custom Q&A | buttons | Act on the active tab |
 | Q&A bank | `#qaOpenEditorBtn`, learn mode `#qaLearnToggle` | Learn mode saves answers typed on forms |
+| Clean junk Q&A | `#qaPruneJunkBtn` → confirm **Clean** in `[role=alertdialog]` | Deletes bank rows failing `isBankableQa` (editor rows kept); count label shows the new total |
+
+**Q&A bank behaviour (since bot `af07f98`):**
+- Every save goes through `isBankableQa` (`autofill-junk.js`). Page chrome, trackers, cookie and consent toggles, report-job options, work-history rows, placeholders, markup, option ids, URLs, a bare "Please specify", and a Yes/No answer to a "which/what" question are all dropped. Rows typed in the editor (`source: user-editor`) are trusted and never overwritten.
+- Reuse goes through `findQaMatches`, which returns ranked candidates (threshold 0.82; Yes/No answers need ≥0.9 similarity). The runner takes the first candidate that fits.
+- Pay questions never use the bank; they use the standard pay rule. Contact and sensitive fields come only from the profile.
+- If the bank fills up with junk again: preview read-only first (import `autofill-junk.js` on the bot page and run `isBankableQa` over the `brightstar_qa`/`qa_bank` rows). Then add the new junk pattern plus a test to `tests/qa-bank-gate.test.js`, reload, and click Clean junk.
+- To make an answer reliably reusable, add it in **Open editor**; editor rows win over scraped and AI rows.
 
 Batch submit itself is decided by Batch mode + `ats/adapters.js` (sites with an adapter submit;
 others fill and pause). External Indeed is never auto-submitted.
