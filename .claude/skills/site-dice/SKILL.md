@@ -23,6 +23,8 @@ description: How to apply on Dice (dice.com) with BrightStar Bid Bot — Easy Ap
 | Sign-in page instead of wizard | H | User signs in to Dice in this profile; Start | 2026-11-13 |
 | Job no longer available | J | Bot marks inactive/skipped | 2026-11-13 |
 | "Cover letter missing — regenerate cover" | B | Rebuild the row (cover PDF), then apply | 2026-11-14 |
+| Status loops "clicking <job title>…" ↔ uploading, many duplicate job-detail tabs | D | Job title contained "Next" and was taken for the Next button. **Pause**, close the extra tabs, finish the review page by hand (check Work Authorization / Location), Submit, Mark applied. Fixed in bot (`looksLikeActionLabel`, 2026-11-15) — if it recurs, check `classifyActionButton` in content/autofill.js | 2026-11-15 |
+| Many consecutive "skipped inactive job" | J | Usually real: Dice returns HTTP 410 "no longer available". Spot-check one link with a read-only fetch before suspecting the bot | 2026-11-15 |
 
 ## Validated 2026-11-15 (Avash, 2/2 submitted, no hand-off)
 - Status trail: `generating row N` → resume JSON (may re-prompt for JD-skill bullets / ATS
@@ -34,6 +36,14 @@ description: How to apply on Dice (dice.com) with BrightStar Bid Bot — Easy Ap
   row folder (jd.txt + resume + cover). To cap a run, click **Stop** during the cooldown after
   the last wanted row is `applied`.
 - Dice jobs come from the CSV (`jobs_latest.csv`); the sheet capture tab may have none.
+
+## Run stats (2026-11-15, Avash, cap 25)
+- 25 applied in ~2.5 h, 1 hand-finished (bot bug, now fixed), 12 closed postings skipped (~25% of a
+  2-day-old CSV) — load the CSV fresh before a run.
+- Enforce the cap from the monitor loop: when applied − baseline ≥ cap, click `#batchStop`
+  (it halts after the current job).
+- Misfits to remove at review: "must be WI/state resident", "local to X only", non-US locations,
+  non-Salesforce titles (e.g. Tacton CPQ).
 
 ## Notes
 - Watch the first 2–3 Dice submits of a session to confirm they really land.

@@ -42,6 +42,7 @@ Status bar: `#status` (bottom). Read it after every action.
 | Retry errors | `#retryErrors` | |
 | Clear queue / Reset | `#clearJobs #reset` | **Ask the user first** — destructive |
 | Queue list | `#queueList`, `#queueSearch`, `#queueNowWorking` | Row actions: open link, Files, Remove (pending only), Retry (error), **Mark applied ✓** (done & not applied), **Apply** |
+| (row buttons disabled after Stop/Pause) | — | Old builds kept Remove / Mark applied disabled until a reload (fixed 2026-11-15). If seen: reload the bot page. Clicking from the page: find the row in `#queueList`, its `aria-label` "Remove" / "Mark applied" button; confirm dialog is `[role=alertdialog]` — check it names the right job first |
 | Mark applied ✓ | row button | `mark_queue_job_applied` → sheet Applied + queue `applied`. Use only after a confirmed submission done by hand (Claude/user) |
 | Apply (row) | row button | Manual apply assist for that row (opens job + panel). Non-hosted rows get marked Applied on the sheet when opened — don't use it just to "check" a row |
 
