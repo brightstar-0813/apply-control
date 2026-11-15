@@ -25,7 +25,9 @@ description: Run a job-application session with BrightStar Bid Bot for an enable
 
 ## 2. Load and review
 
-1. **Load from sheet** (`#loadSheetJobsBtn`); wait for `#status` to settle.
+1. **Load from sheet** (`#loadSheetJobsBtn`) — the user's primary source; wait for `#status` to settle.
+   Fallback only (keep it working): CSV upload of `jobs_latest.csv` via `.uploads/` when the capture
+   tab lacks the wanted source (e.g. no Dice rows). Ask before switching a profile to CSV.
 2. Read per-source counts and the first ~10 pending rows (company / title / source).
 3. **LinkedIn rows** (`linkedin.com` links, "LI" in the counts): never applied (CLAUDE.md rule 11).
    Offer to remove them with the row trash before Start so no generation time is spent on them.
