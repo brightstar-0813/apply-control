@@ -25,7 +25,7 @@ Status bar: `#status` (bottom). Read it after every action.
 | Capture tab | textbox "Capture tab" | e.g. `US-SF-Jobs` |
 | Load from sheet | `#loadSheetJobsBtn` | Ingests jobs → queue. Never starts |
 | CSV | `#csvFile #csvRefresh #csvPinFile` | Upload = **fresh queue** (old statuses dropped). `upload_file` only reads files under the MCP `--workspace` roots → copy the CSV to `C:\apply-control\.uploads\` (git-ignored). If `#status` doesn't show "Parsing CSV…", dispatch `change` on `#csvFile`. Sources: `C:\brightstar-sf-job-capture\download\jobs_latest.csv` (all boards) — the sheet capture tab may have no Dice jobs |
-| Sheet calls | Apps Script web app | Error "missing listCaptureJobs" → user must redeploy `apps-script/Code.gs` (Deploy → Manage deployments → Edit → New version). "Checking Google Sheet…" stuck > 2 min → requests have no timeout; reload the bot (queue survives) |
+| Sheet calls | Apps Script web app (**shared** with brightstar-sf-job-capture — same deployment) | Both repos must keep an identical merged `apps-script/Code.gs` (all actions: append, appendWarehouse, replaceWarehouse, listRows, listLinks, listCaptureJobs, markApplied). If one side drifts, the other side's deploy drops actions. Check live actions: POST `{action:"bogus"}` → the error lists them. Error "missing listCaptureJobs" → user must redeploy the merged `apps-script/Code.gs` (Deploy → Manage deployments → Edit → New version). "Checking Google Sheet…" stuck > 2 min → requests have no timeout; reload the bot (queue survives) |
 | Source filter | `#filterBuiltin #filterHimalayas #filterGreenhouse #filterDice #filterJobright #filterWorkday #filterEtc`("Other") `#filterAll` (`#filterLinkedIn` exists — never use it, rule 11) | By job **link host**. Hint `#sourceSubmitHint` says what Start will do |
 | Counters | QUEUE / DONE / APPLIED / PENDING / SKIPPED / ERROR | Baseline before, compare after |
 | Output folder | `#outputDir` | Defaults to person sheet tab |
@@ -110,6 +110,8 @@ async () => {
   - **Job error — retrying ⚠️ / Job failed ❌** — real failures on adapter sites and generation.
   - Batch paused / failed / ChatGPT rate limit, required field unanswered (adapter sites),
     duplicate skips, batch complete summary.
+  - **Verify in Slack:** the channel is open in the **Tools** profile (`Profile 3`, Slack tab titled
+    "… - Bid Bot - Slack"). Read-only: `take_snapshot` of that tab only — never type or click send.
   - Text built by `buildSlackJobStatusText` in `slack.js`; hand-off boards = `isHandoffBoard`
     in `batch-apply-policy.js`. Empty webhook → nothing sent, silently.
 - Webhook URLs are secrets: enter them in the bot UI only, never in files or the run log.

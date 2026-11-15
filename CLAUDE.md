@@ -29,6 +29,8 @@ Person data comes from the bot (built-in `profiles.js` or the custom copy in tha
    (`Profile 1`) only.** Don't open, read, or touch pages in any other Chrome profile
    (Carlos, Tools, …) even though the debug connection can see them. Enabling another
    profile means the user says so and `profiles/index.md` is updated.
+   **Exception — Tools (`Profile 3`), read-only:** only to check the Slack channel (bot alerts,
+   "Applied ✅" messages) in its Slack tab. Never type, click send, or touch other tabs there.
 2. **Operate like the user, not around the bot.** Use the bot's own controls. Do not write
    `chrome.storage` directly or fake bot messages to change state; service-worker
    `evaluate_script` is for **read-only** diagnostics.
