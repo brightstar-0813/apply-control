@@ -49,6 +49,19 @@ description: Host → site-skill routing table for BrightStar Bid Bot apply tabs
   type "City, ST" and pick the suggestion. Rating questions use Strong No / No / Yes / Strong Yes radios.
   **An invisible Cloudflare Turnstile is on the page (`#turnstile-container`):** a CDP click on **Apply** sends nothing
   (no POST, no error), so it's human-only. Ask the user to click Apply. (Offprem Technology, 2026-11-15)
+- **Dayforce** (`jobs.dayforcehcm.com/<co>/candidateportal/jobs/<id>/apply`): use **Apply without an Account**. The SMS dialog
+  defaults to "do not consent", so just Save. Reject cookies; if the Cookie Preference Center opens, Save it.
+  The flow is Candidate Info → Questionnaire (1..n pages) → Submit (acknowledgement checkbox + Submit). It has an
+  invisible reCAPTCHA but submitting worked.
+  - **Import Resume** (upload to that button) parses name, email, phone, city and *all* employment rows. Each
+    resume row opens as an edit form; they close on their own once you save personal info.
+  - Personal info: Confirm Email, LinkedIn, address, zip, then the antd selects (Preferred Contact, Country, State,
+    How did you hear) and **Update Personal Information**. Country and State are searchable: focus the input,
+    type, then Enter. "How did you hear" isn't searchable: arrow to the option (ArrowUp wraps to the last one;
+    "himalayas.app" is listed).
+  - Cover letter: the hidden `#jobPostingApplication_files_coverLetter` needs a style tweak before `upload_file`.
+  - Questionnaire text inputs sometimes ignore `fill`: focus the input by id, `type_text`, then check the value length.
+  - Done page: `/apply/success` "Congratulations… confirmation number …". References are optional. (Parking Management Co, 2026-11-15)
 
 ## When a host repeats
 
