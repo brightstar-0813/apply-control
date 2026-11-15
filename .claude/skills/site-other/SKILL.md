@@ -63,6 +63,20 @@ description: Host → site-skill routing table for BrightStar Bid Bot apply tabs
   - Questionnaire text inputs sometimes ignore `fill`: focus the input by id, `type_text`, then check the value length.
   - Done page: `/apply/success` "Congratulations… confirmation number …". References are optional. (Parking Management Co, 2026-11-15)
 
+- **Oracle Cloud HCM** (`*.fa.*.oraclecloud.com/hcmUI/CandidateExperience/.../job/<id>`, e.g. SAIC): APPLY NOW → email
+  + terms (click the label text; the checkbox ignores clicks) → **6-digit code by email** ("Confirm your identity" from
+  "<Co> Careers"; type it into digit box 1) → one long page.
+  - **Inactivity timeout:** "Are You Still With Us?" signs you out after a few idle minutes, and you land on Search Jobs.
+    Don't stop to ask the user mid-form: collect questions first, or expect to log back in (new code). The draft is kept.
+  - Import the resume first: it fills contact info, work history and education. Then delete wrong or extra rows (only
+    the past 5 years of work; no certificates in education). Education needs Degree radio, Major (type + gridcell),
+    Graduated, and a **full** date (month + year).
+  - Dropdowns are grids: click the combobox, then the `gridcell`. Address Line 1 is a lookup: type the street, pick the
+    full "…, CITY, STATE, ZIP" cell.
+  - SAIC questions: gov employment status, work authorization, ex-SAIC, salary band, relocate, active clearance,
+    veteran status, e-signature Full Name. Done = redirect to `my-profile` with "Application Received".
+    (SAIC, 2026-11-15)
+
 ## When a host repeats
 
 Handled the same host twice → create `site-<name>` from `templates/site-skill/` (`blocker-fix` §3).

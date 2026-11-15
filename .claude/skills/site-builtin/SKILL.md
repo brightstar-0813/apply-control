@@ -25,5 +25,7 @@ description: How to handle Built In (builtin.com and city sites) jobs with Brigh
 | Symptom | Class | Fix | Added |
 |---------|-------|-----|-------|
 | Apply → "applyRequired" name/email bar | H | Employer careers page instead; Built In sign-up only with the user's OK | 2026-11-15 |
+| Logged out, but the person has a Built In account (Avash does) | A | **Log In** → email → **magic link** ("One-time login link to Built In" in the person's mailbox; no password). Open `accounts.builtin.com/token/<t>` in the same tab, then Apply redirects straight to the employer ATS | 2026-11-15 |
+| SAIC listing not found by searching SAIC's careers site | A | Logged-in Apply went to SAIC Oracle HCM `eihu.fa.us8.oraclecloud.com/.../job/2619048` (see site-other: Oracle HCM) | 2026-11-15 |
 | Bot: "No Next/Submit button detected" on the listing | expected | No adapter. Do the flow above | 2026-11-15 |
 | Listing company is a brand of a larger employer (Spectrum San Diego = SAIC) | A | Search the parent's careers site; SAIC's search didn't turn it up → skipped | 2026-11-15 |
