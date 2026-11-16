@@ -60,7 +60,9 @@ Person data comes from the bot (built-in `profiles.js` or the custom copy in tha
    account **without asking**, with the person's profile email and the bot's per-person **ATS
    password** (bot profile `password`, default `DEFAULT_ATS_PASSWORD` in `profiles.js`), entered
    by the in-page panel's **Autofill** — Claude never types, reads, logs, or posts the password.
-   Email verification / OTP → ask in Slack. See `slack-chat` → Account walls.
+   **Mailbox (user, 2026-11-16, terminal, standing):** Claude may read the person's own **Outlook tab**
+   (Avash, Lewis) to find and click verification links / codes, and to check "already applied?" for
+   a company before an account wall. Never send, reply, delete, or move mail. See `slack-chat`.
 7. **Credentials never go in files** — not in skills, profiles, runs, or commits. Logins live
    in the Chrome profile. If a password is needed mid-run, ask; use it once; don't record it.
 8. **Pace it.** Respect the bot's cooldowns; stop on rate-limit signals. Default cap is in

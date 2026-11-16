@@ -97,7 +97,13 @@ it does not click Create Account (panel: "Create Account — needs you"). Close 
 opens, re-snapshot, click **Create Account** yourself. Then sign in the same way (Autofill → Sign In).
 "Wrong email or password / account locked" right after creating = **email not verified yet** → Slack
 question for the verification link (Wintrust Workday, 2026-11-16). Check only `value.length` of
-password fields, never the value. Old flow kept below for reference.
+password fields, never the value.
+**Before creating:** search the person's Outlook tab (allowed, CLAUDE.md rule 6) for the company name.
+A "Thank You for Applying" / status / interview thread for the same requisition = **already applied** →
+don't apply again, don't Mark applied, log it, tell the user (Wintrust #73: applied 10/20, interviewed
+11/2; the new-account sign-in failed because the old account has another password).
+Verification links / OTP codes: read them from the same Outlook tab yourself.
+Old flow kept below for reference.
 
 User decision 2026-11-15 (superseded): Claude creates accounts, using Chrome's suggested password.
 Never on job boards / aggregators (Jobgether, Built In, Himalayas, Jobright, LinkedIn), only on the
