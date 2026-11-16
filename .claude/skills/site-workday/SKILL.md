@@ -36,3 +36,8 @@ for manual panel runs, not the batch.
 | Date spinbuttons (MM/DD/YYYY) ignore click | A | Focus the Month input via script, `type_text` "MMDDYYYY" | 2026-11-15 |
 | T&C consent checkbox ignores click | A | Focus it via script, press Space | 2026-11-15 |
 | Done | — | Redirects to Candidate Home: "My Applications … Application Received" (Republic Services, 2026-11-15) | 2026-11-15 |
+| New account → "An email has been sent to you. Please verify your account." (IRC theirc.wd1) | W | Outlook: "Verify your candidate account" — the activate URL is **plain text** in the body (no `<a>`), regex it out and open it in the Workday tab → "Account Activated" → Sign In with panel Autofill | 2026-11-16 |
+| After sign-in, `/job/.../apply/applyManually` URLs bounce to the job list / Candidate Home | D | Use the search: `<site>?q=<JR id>` → open the posting → Apply → Apply Manually | 2026-11-16 |
+| Multiselect "How Did You Hear" opens a **sub-list** after the first pick (e.g. Social and Online Postings → Glassdoor/Indeed/…) | A | Click the category, then the leaf option by snapshot uid; the first leaf shows `selected` = focus only, check the "1 item selected, X" description | 2026-11-16 |
+| Race options are numbered ("4 - Asian (United States of America)") | A | Match by substring, not `^Asian` (a miss left "Native Hawaiian…" selected) | 2026-11-16 |
+| Disability CC-305 checkboxes ignore click / label click | A | Focus the input and press Space (same as T&C) | 2026-11-16 |
