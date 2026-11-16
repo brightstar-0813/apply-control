@@ -8,7 +8,8 @@ $ErrorActionPreference = 'SilentlyContinue'
 $root = Split-Path -Parent $PSScriptRoot
 if (-not (Test-Path (Join-Path $root 'runs\.slack-live'))) { exit 0 }
 
-$raw = [Console]::In.ReadToEnd()
+# Hook input is UTF-8 JSON; the console default (OEM codepage) garbled en dashes in Slack.
+$raw = (New-Object IO.StreamReader([Console]::OpenStandardInput(), (New-Object Text.UTF8Encoding($false)))).ReadToEnd()
 $in = $null
 try { $in = $raw | ConvertFrom-Json } catch {}
 
