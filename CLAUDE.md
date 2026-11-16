@@ -35,6 +35,8 @@ Person data comes from the bot (built-in `profiles.js` or the custom copy in tha
    (bot alerts, "Applied ✅", and the user's replies to Claude, which count as user instructions;
    see `slack-chat`). Never type, click send, or touch other tabs there. Claude posts to that
    channel only through `scripts/slack-post.ps1` (webhook in user env var `BIDBOT_SLACK_WEBHOOK`).
+   **Whenever Claude stops working, its final message ends with a specific question**; the Stop
+   hook posts it to Slack while `runs/.slack-live` exists (`slack-chat`).
 2. **Operate like the user, not around the bot.** Use the bot's own controls. Do not write
    `chrome.storage` directly or fake bot messages to change state; service-worker
    `evaluate_script` is for **read-only** diagnostics.

@@ -9,6 +9,22 @@ The user wants to steer runs from the Slack channel where the bot posts its aler
 (DM `louis.michael9523`, workspace "Bid Bot"). Claude is the listener; the bot itself
 still only posts (webhook, one-way).
 
+## Slack-live sessions and stopping (user decision 2026-11-15)
+
+- **Slack-live** = flag file `runs/.slack-live` exists. `apply-run` creates it at session start
+  and deletes it at Close; create it also when the user says to work via Slack.
+- **Whenever Claude stops working** (turn ends: blocked, waiting, Chrome unreachable, error,
+  cap reached, run done) its **final message must end with one specific question**:
+  `Q<n>: <what exactly you need> - reply "Q<n> <option>" (options: …)`. Put the context
+  (person, row, site, what's on screen, what you tried) just above it, short.
+- The **Stop hook** (`scripts/slack-stop-hook.ps1`, in `.claude/settings.json`) posts that final
+  message to Slack automatically while slack-live, so don't also post it by hand.
+- Before stopping, try to wait in-turn first (see "When to check"). Once the turn has ended,
+  a Slack reply can't wake Claude; the user's reply is read on the next terminal nudge or
+  `/loop` wake-up, so stop only when waiting in-turn no longer makes sense.
+- Chrome unreachable means Slack replies can't be read either; say so in the question
+  ("reply in the terminal").
+
 ## Send (Claude → user)
 
 ```

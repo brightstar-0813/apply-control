@@ -1,7 +1,9 @@
 {
   "enableAllProjectMcpServers": true,
   "permissions": {
-    "additionalDirectories": ["C:\\brightstar-bid-bot"],
+    "additionalDirectories": [
+      "C:\\brightstar-bid-bot"
+    ],
     "allow": [
       "mcp__chrome-devtools__list_pages",
       "mcp__chrome-devtools__select_page",
@@ -19,6 +21,19 @@
       "Bash(git status:*)",
       "Bash(git diff:*)",
       "Bash(git log:*)"
+    ]
+  },
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File \"C:/apply-control/scripts/slack-stop-hook.ps1\"",
+            "timeout": 30
+          }
+        ]
+      }
     ]
   }
 }

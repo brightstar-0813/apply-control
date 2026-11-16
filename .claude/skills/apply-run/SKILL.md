@@ -12,7 +12,8 @@ description: Run a job-application session with BrightStar Bid Bot for an enable
 - Session overrides from the user: filter, cap, submit, batch mode.
 - Log as you go in `runs/YYYY-MM-DD-<id>.md` (format: `runs/README.md`).
 
-Talk to the user through Slack (`slack-chat`): post session start, the queue for review, every
+Talk to the user through Slack (`slack-chat`): create `runs/.slack-live` at start (delete it at
+Close); every stop ends with a specific Q<n> question, which the Stop hook relays. Post session start, the queue for review, every
 question and stop; read their replies at every poll. Terminal messages still work too.
 
 ## 1. Preflight (stop and ask on any failure)
