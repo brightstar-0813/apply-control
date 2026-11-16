@@ -101,6 +101,14 @@ description: Host → site-skill routing table for BrightStar Bid Bot apply tabs
   Himalayas (use Zoho's posted range). **Image CAPTCHA before Submit Application** → human-only: fill everything
   else, leave the tab open, ask in Slack.
 
+- **Rippling** (`ats.rippling.com/<tenant>/jobs/<id>/apply`, seen 2026-11-16 e.Republic). One page; bot
+  fills most and stops at "step limit". Finish by hand: required custom essay (write it only from the
+  master resume's facts), Hispanic/Latino listbox (`[role=option]`), SMS radio, cover-letter upload on the
+  "Drop or select" button, and **Location must be picked from its suggestion list** ("Falls Church, VA, USA").
+  **Apply is gated by Cloudflare Turnstile**: our click sends no submit request (only `cdn-cgi/challenge-
+  platform` pings) → human-only; leave the filled tab and ask the user to click Apply. If the user closes
+  the tab, Start reopens the row and the bot refills it (essay/cover letter/location need redoing).
+
 ## When a host repeats
 
 Handled the same host twice → create `site-<name>` from `templates/site-skill/` (`blocker-fix` §3).
