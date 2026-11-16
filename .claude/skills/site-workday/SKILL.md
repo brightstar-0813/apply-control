@@ -25,6 +25,8 @@ for manual panel runs, not the batch.
 ## Known blockers
 | Symptom | Class | Fix | Added |
 |---------|-------|-----|-------|
+| Accenture (`accenture.wd103`) Sign In is a modal ("Sign in with Google" / "Sign in with email"); clicking the in-page panel resets it, so panel Autofill never sees the email/password fields | W | Existing account: ask the user to sign in, then continue; or fix the panel so its clicks do not blur the modal (#103) | 2026-11-16 |
+| Existing account, bot ATS password rejected (Cencora `myhrabc.wd5`) | W | "Forgot your password?" needs a **terminal** OK (a Slack OK was blocked by the permission check) | 2026-11-16 |
 | Create account + email verification | A/H | Slack "Q create" → Claude signs up with Chrome-suggested password; user clicks the verification link (Gmail connector only if user agrees) | 2026-11-15 |
 | Date / phone format rejected | D | `autofill-workday-format.js`; fix there if repeatable | 2026-11-13 |
 | Save and Continue loops | D | Snapshot red error text; fill the flagged field | 2026-11-13 |
