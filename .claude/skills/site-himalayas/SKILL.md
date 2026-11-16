@@ -20,7 +20,7 @@ description: How to handle Himalayas (himalayas.app) remote jobs with BrightStar
 ## Known blockers
 | Symptom | Class | Fix | Added |
 |---------|-------|-----|-------|
-| Bot status "Reached Submit (Save). Stopped so you can review" on the listing | D (classifier) | It mistakes the listing's job **Save** button for Submit. Ignore it and click through as above | 2026-11-15 |
+| Bot status "Reached Submit (Save). Stopped so you can review" on the listing | D (classifier) | **Fixed in bot 8c04668 (2026-11-16)**: bookmark labels are never Submit; status now reads "Reached Submit (Apply now)" — still a hand-off, click through as above | 2026-11-16 |
 | Bot wandered to `himalayas.app/plus/job-application-tracker` ("Reached Submit (… Applied)", a tracker card read as Submit) | D (classifier) | Go back to the row's job link and click through by hand | 2026-11-15 |
 | **I'm ready to apply** opened no tab (or opened one late, so there were two) | expected | Navigate the listing tab to the `himalayas.app/apply/<id>` href; close any duplicate tab | 2026-11-15 |
 | A hand-finished form left open (waiting on the user) was closed when the bot started the next row | expected | Finish or submit a row before Start; otherwise re-open it later from the `himalayas.app/apply/<id>` link | 2026-11-15 |
