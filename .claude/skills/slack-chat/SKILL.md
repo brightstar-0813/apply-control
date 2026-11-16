@@ -90,7 +90,16 @@ powershell -NoProfile -File scripts/slack-post.ps1 -Text "<message>"
 
 ## Account walls (employer ATS sign-up / sign-in)
 
-User decision 2026-11-15: Claude creates accounts, using Chrome's suggested password.
+**User decision 2026-11-16 (replaces the Chrome-suggested-password flow below): create accounts
+yourself, no Slack question first.** Panel **Autofill** on the sign-up form fills the person's profile
+email + the bot's ATS password (`personToAtsCredentials` / `DEFAULT_ATS_PASSWORD`) and ticks terms;
+it does not click Create Account (panel: "Create Account — needs you"). Close any Sign In pop-up it
+opens, re-snapshot, click **Create Account** yourself. Then sign in the same way (Autofill → Sign In).
+"Wrong email or password / account locked" right after creating = **email not verified yet** → Slack
+question for the verification link (Wintrust Workday, 2026-11-16). Check only `value.length` of
+password fields, never the value. Old flow kept below for reference.
+
+User decision 2026-11-15 (superseded): Claude creates accounts, using Chrome's suggested password.
 Never on job boards / aggregators (Jobgether, Built In, Himalayas, Jobright, LinkedIn), only on the
 employer ATS the application needs (Workday tenant, iCIMS, Taleo, SuccessFactors, Oracle, …).
 
