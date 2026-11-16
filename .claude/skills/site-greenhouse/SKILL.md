@@ -23,5 +23,6 @@ description: How to apply on Greenhouse (boards.greenhouse.io, job-boards.greenh
 | Security code, no mailbox tab | H/A | Open the person's mailbox tab (or Gmail connector); fill; resubmit | 2026-11-13 |
 | Custom "Years of X" / "Why us" | A | Q&A bank; free text only from resume facts | 2026-11-13 |
 | Employer page embeds Greenhouse in an iframe (e.g. mongodb.com/careers/jobs/<id>); bot classes it "Other" and stops at Submit | N | Finish in the iframe. **Re-snapshot right before Submit and use that uid**: a stale uid clicked a footer link and navigated away (form lost). After a back/reload, DevTools may not see the iframe; load the page fresh (`job-boards.greenhouse.io/<co>/jobs/<id>` redirects back) and fill by hand | 2026-11-16 |
+| Long-answer **textarea** (custom question) shows a value after `fill` but Submit says "This field is required" | D | `fill` did not register with the React textarea. Click it, Ctrl+A, Delete, then `type_text`; check `textarea.value.length` (FormativGroup #75, 2026-11-16) | 2026-11-16 |
 | Disability options "No, I do not have a disability **and have not had one in the past**" | D (bot bug) | Bot picked "Yes, I have a disability…". Always check the EEO block before Submit; fix by hand | 2026-11-16 |
 | Location autocomplete rejects typed text | D | Type, wait for listbox, pick the option | 2026-11-13 |
