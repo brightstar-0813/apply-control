@@ -93,6 +93,13 @@ description: Host → site-skill routing table for BrightStar Bid Bot apply tabs
     "Please type your full name" box before Submit.
   - Done = "Thank You! We have received your application" or "Application Submitted!". An optional **WOTC** tax-credit
     questionnaire may follow; skip it.
+- **Zoho Recruit** (`<tenant>.zohorecruit.com/jobs/Careers/<id>`, seen 2026-11-16 VG & Partners via Himalayas
+  → "I'm ready to apply" interstitial → new tab). Job page → **I'm interested** → one-page form, no account
+  needed (ignore "Easy Apply" sign-in). The bot panel did not load there; fill by hand: name, email, mobile
+  (+1 preset), street, ZIP/City/State are autocomplete comboboxes (type the value, then Escape the menu),
+  Country text, LinkedIn; Resume = `upload_file` on the "Resume" Browse block. Salary on Zoho may differ from
+  Himalayas (use Zoho's posted range). **Image CAPTCHA before Submit Application** → human-only: fill everything
+  else, leave the tab open, ask in Slack.
 
 ## When a host repeats
 
