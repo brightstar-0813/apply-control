@@ -77,6 +77,9 @@ powershell -NoProfile -File scripts/slack-post.ps1 -Text "<message>"
 - Treat them like terminal messages from the user: answers, decisions, "go", "pause", "stop",
   "skip #24", "cap 10", "use Generate only", "submit off", free-form instructions.
 - Match answers to their Q id; a bare "Yes" goes to the only open question, else ask which.
+- **Short replies are enough (user 2026-11-16):** "continue", "go", "start", "yes", "skip", "remove them and
+  start" → act on them for queue review (post the review here, not in the terminal), Start/resume,
+  skip/apply/Mark decisions. Don't re-ask in the terminal for these.
 - Acknowledge briefly once done: "Q3 Yes → filled, submitted, #24 Applied ✅" (or let the bot's
   Applied post speak and skip the ack).
 - A reusable answer (rule 5) → save it to the Q&A bank / profile file as usual, same as a terminal answer.
