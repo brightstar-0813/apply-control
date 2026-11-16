@@ -109,6 +109,14 @@ description: Host → site-skill routing table for BrightStar Bid Bot apply tabs
   platform` pings) → human-only; leave the filled tab and ask the user to click Apply. If the user closes
   the tab, Start reopens the row and the bot refills it (essay/cover letter/location need redoing).
 
+- **UKG careers** (`apply.ukg.com/careers/apply?pid=<id>`, seen 2026-11-16 UKG #205). One page, no account.
+  Panel Autofill **puts the email into the Phone field** and leaves Email flagged: click the field's "Clear"
+  button, click the field, `type_text` (plain `fill` appends). A **Data Privacy Agreement** modal appears →
+  "I Agree" (leave job-recommendation emails unchecked). Comboboxes (Country code, Country, State, Yes/No
+  questions): click, `type_text` the option, then click the `[role=option]` inside the input's
+  `aria-controls` list. **Start date: "Today" is rejected** ("cannot be in the past", UKG's clock runs a day
+  ahead) → pick tomorrow. Two "I Accept" consents. Done = `/apply/success` "Thank you for your application".
+
 ## When a host repeats
 
 Handled the same host twice → create `site-<name>` from `templates/site-skill/` (`blocker-fix` §3).
