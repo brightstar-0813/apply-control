@@ -66,7 +66,14 @@ Person data comes from the bot (built-in `profiles.js` or the custom copy in tha
    the profile file.
 9. **Bot code changes** follow `C:\brightstar-bid-bot\.cursor\skills\brightstar-auto-apply\SKILL.md`
    (layering + safety invariants), then `npm run check && npm test` in that repo, then
-   `reload_extension`. Don't commit there unless the user asks.
+   `reload_extension` (between rows, never mid-generation).
+   **Continuous improvement (user, 2026-11-16):** while applying, keep improving autofill
+   (option matching, labels, answers, Q&A bank) and the skills from what each form teaches.
+   Keep the bot's main functions intact (batch loop, generation, sheet, submit policy); changes
+   outside autofill / skills need a Slack OK first.
+   **Commit + push yourself** for non-critical changes once `npm run check && npm test` pass
+   (bot: branch `develop`; this repo: `main`; rebase on the remote first). Critical or
+   behaviour-changing ones → ask in Slack (`Q<n>`) and push after the OK.
 10. **Every blocker leaves a trace:** a line in the run log and, if it's reusable knowledge,
     an edit to the matching `site-*` skill (or a new one).
 11. **Never apply through LinkedIn** (user decision 2026-11-14). Never select the LinkedIn
