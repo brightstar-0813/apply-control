@@ -27,6 +27,7 @@ Ashby) → bot submits. Anything else (Paylocity, Breezy, custom) → bot fills,
 ## Known blockers
 | Symptom | Class | Fix | Added |
 |---------|-------|-----|-------|
+| Employer link lands on `apply.workable.com/<co>/?not_found=true` (job closed; page is the company board) | J | Bot fix 60c99cb (2026-11-16): URL check → inactive-job skip. Before it, the bot "filled" the board and paused 3×; Skip does nothing on an apply-step pause, Start until attempts (3) run out |
 | Bot clicked footer "AI CV Review" → sign-in page | D (bot bug) | Fixed 2026-11-15: footer/nav links and "CV/resume review" labels are never form steps | 2026-11-15 |
 | "Submit was clicked…" on the job page / "report this job" radios in the panel | D (bot bug) | The hidden report-job modal was taken for a form. Fixed: on `/offer/` pages the only step is APPLY. If seen again: Stop at once | 2026-11-15 |
 | "Create your Jobgether account" modal filled with name/email/**password** | D (bot bug) | Clicking APPLY while signed out opens a sign-up wall. Fixed: bot no longer clicks APPLY, it opens the href. If seen: Stop, clear the password field (it is inside an `auth.jobgether.com` iframe — use `fill`), close without Sign up | 2026-11-15 |
