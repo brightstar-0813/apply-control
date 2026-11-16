@@ -22,6 +22,7 @@ Gather: apply-tab `take_snapshot`, `list_console_messages` (error/warn) on that 
 | **P — policy** | Stopped before Submit by design (external Indeed, submit off) | Follow the profile submit setting; never change policy code |
 | **J — job state** | Closed/expired, already applied, redirect elsewhere | Skip / let the second attempt exhaust it; log |
 | **B — bot error** | SW exception, AI JSON not harvested, download / sheet failure | Save JSON / Retry errors / reload; fix code if it repeats |
+| **E — empty JD** | Row error "Empty job description in CSV" | Since bot 2da3ede the batch reads the JD from the job link itself (background tab, never LinkedIn) and builds/applies **automatically, no review** (user 2026-11-16). Old error rows → row **Retry**. If it still errors ("job link had no readable description") → open the link, check location/closed, Mark skipped with a short reason |
 
 ## 2. Unblock now
 
