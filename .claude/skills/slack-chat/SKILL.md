@@ -107,6 +107,7 @@ employer ATS the application needs (Workday tenant, iCIMS, Taleo, SuccessFactors
      the field is non-empty (`evaluate_script` returning `el.value.length > 0` only, never
      the value). Never `fill` or `type_text` a password, never snapshot with `verbose` on that
      form.
+   - **Tested 2026-11-16 (Wintrust Workday, Avash): no suggestion appeared** (click + ArrowDown/Enter left both fields empty; the popup is likely only offered on real user focus or with Chrome sync/password manager on). Expect the fallback below until it works once.
    - No suggestion appears (password manager off, site blocks it) → don't invent one; post
      "Q5: Chrome didn't offer a password here, please create it and reply Q5 done".
    - Submit sign-up. Chrome saves a generated password automatically on submit.
