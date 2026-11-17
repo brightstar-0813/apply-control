@@ -143,7 +143,7 @@
   async function loadThread() {
     const msgs = await api('/api/messages');
     $('thread').innerHTML = msgs.map((m) => `<li class="${m.author}"><div class="bubble">${esc(m.text)}` +
-      `<span class="meta">${m.author === 'user' ? (m.delivered_ts ? 'delivered ' + hhmm(m.delivered_ts) : 'queued') : 'agent'} · ${hhmm(m.ts)}` +
+      `<span class="meta">${m.author === 'user' ? (m.via === 'terminal' ? 'terminal' : (m.delivered_ts ? 'delivered ' + hhmm(m.delivered_ts) : 'queued')) : 'agent'} · ${hhmm(m.ts)}` +
       `<button class="del" data-del="${m.id}" title="${m.author === 'user' && !m.delivered_ts ? 'Unsend' : 'Delete'}" aria-label="Delete message">✕</button></span></div></li>`).join('') ||
       '<li class="muted small">No messages.</li>';
     if (!$('tab-inbox').hidden) $('thread').lastElementChild?.scrollIntoView({ block: 'end' });

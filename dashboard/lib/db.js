@@ -23,6 +23,7 @@ function open(dataDir) {
       token TEXT PRIMARY KEY, ts INTEGER NOT NULL, expires INTEGER NOT NULL, ua TEXT);
     CREATE TABLE IF NOT EXISTS kv (k TEXT PRIMARY KEY, v TEXT);
   `);
+  try { db.exec('ALTER TABLE messages ADD COLUMN via TEXT'); } catch { /* already there */ }
 
   const q = (sql) => db.prepare(sql);
   const st = {
@@ -32,7 +33,7 @@ function open(dataDir) {
     events: q('SELECT * FROM events WHERE id > ? ORDER BY id DESC LIMIT ?'),
     eventsBefore: q('SELECT * FROM events WHERE id < ? ORDER BY id DESC LIMIT ?'),
     pruneEvents: q('DELETE FROM events WHERE id < (SELECT MAX(id) FROM events) - ?'),
-    addMsg: q('INSERT INTO messages(ts, author, text, delivered_ts) VALUES(?,?,?,?)'),
+    addMsg: q('INSERT INTO messages(ts, author, text, delivered_ts, via) VALUES(?,?,?,?,?)'),
     msgs: q('SELECT * FROM messages ORDER BY id DESC LIMIT ?'),
     pendingMsgs: q("SELECT * FROM messages WHERE author = 'user' AND delivered_ts IS NULL ORDER BY id"),
     deliver: q('UPDATE messages SET delivered_ts = ? WHERE id = ?'),
@@ -66,8 +67,8 @@ function open(dataDir) {
     },
     events(afterId = 0, limit = 200) { return st.events.all(afterId, limit); },
     eventsBefore(id, limit = 200) { return st.eventsBefore.all(id, limit); },
-    addMessage(author, text, delivered = false) {
-      return Number(st.addMsg.run(Date.now(), author, text, delivered ? Date.now() : null).lastInsertRowid);
+    addMessage(author, text, delivered = false, via = null) {
+      return Number(st.addMsg.run(Date.now(), author, text, delivered ? Date.now() : null, via).lastInsertRowid);
     },
     messages(limit = 100) { return st.msgs.all(limit).reverse(); },
     takePending() {

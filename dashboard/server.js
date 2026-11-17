@@ -175,7 +175,14 @@ function handleHook(body) {
       return {};
     case 'UserPromptSubmit': {
       db.set('busy', true);
-      if (!headless) addEvent({ kind: 'prompt', session, summary: 'You (VS Code): ' + clip(redactString(p.prompt || ''), 600) });
+      if (!headless && p.prompt) {
+        // Terminal and dashboard show one conversation; a terminal reply closes the open question cards.
+        const text = redactString(String(p.prompt));
+        addEvent({ kind: 'prompt', session, summary: 'You (terminal): ' + clip(text, 600) });
+        db.addMessage('user', clip(text, 4000), true, 'terminal');
+        const qm = text.match(/^s*(Qd+)[s:,-]*(.*)$/is);
+        for (const q of db.openQuestions()) db.answerQuestion(q.id, qm && q.qid === qm[1].toUpperCase() ? (qm[2] || text).slice(0, 500) : '(answered in terminal)');
+      }
       const ctx = pendingContext();
       pushState();
       return ctx ? { context: ctx } : {};
@@ -438,7 +445,7 @@ async function route(req, res) {
     if (!text) return send(res, 400, { error: 'empty' });
     const qm = text.match(/^\s*(Q\d+)\b[\s:,-]*(.*)$/is);
     if (qm) { const q = db.questionByQid(qm[1].toUpperCase()); if (q) db.answerQuestion(q.id, qm[2] || text); }
-    db.addMessage('user', text);
+    db.addMessage('user', text, false, 'dashboard');
     addEvent({ kind: 'user', summary: 'You (dashboard): ' + clip(text, 600) });
     deliverToWaiters();
     pushState();
