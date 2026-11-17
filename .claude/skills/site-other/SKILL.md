@@ -114,6 +114,12 @@ description: Host → site-skill routing table for BrightStar Bid Bot apply tabs
   platform` pings) → human-only; leave the filled tab and ask the user to click Apply. If the user closes
   the tab, Start reopens the row and the bot refills it (essay/cover letter/location need redoing).
 
+- **arc.dev** (`arc.dev/remote-jobs/j/<slug>`, seen 2026-11-16 Nubestic, Komodo Health). Job board; "Apply now" →
+  `/redirect/<key>` → **arc sign-up wall** (never sign up on a job board). Bot pauses with "No Next/Submit button".
+  "Remote restrictions apply" hides the country: read the JD text (Nubestic = "100% remoto desde España") or find the
+  same title on the employer ATS (Komodo: `boards-api.greenhouse.io/v1/boards/<co>/jobs` → location India). US + ATS
+  found → apply there; else Mark skipped with the country.
+
 - **UKG careers** (`apply.ukg.com/careers/apply?pid=<id>`, seen 2026-11-16 UKG #205). One page, no account.
   Panel Autofill **puts the email into the Phone field** and leaves Email flagged: click the field's "Clear"
   button, click the field, `type_text` (plain `fill` appends). A **Data Privacy Agreement** modal appears →
