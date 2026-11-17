@@ -108,6 +108,10 @@ description: Host → site-skill routing table for BrightStar Bid Bot apply tabs
   Country text, LinkedIn; Resume = `upload_file` on the "Resume" Browse block. Salary on Zoho may differ from
   Himalayas (use Zoho's posted range). **Image CAPTCHA before Submit Application** → human-only: fill everything
   else, leave the tab open, ask in Slack.
+  Some tenants (blackfinconsult, 2026-11-17): **Skill Set is required** — click "Search and add skills", type
+  "Salesforce", click the suggested chip; the resume `input[type=file]` is hidden (unhide via style, then
+  `upload_file`); most jobs have Next → an "Assessment" step after the CAPTCHA, some submit directly.
+  Job ids + titles are in the careers page's hidden `input` JSON (`Posting_Title`, `id`); salary only on the job page.
 
 - **Rippling** (`ats.rippling.com/<tenant>/jobs/<id>/apply`, seen 2026-11-16 e.Republic). One page; bot
   fills most and stops at "step limit". Finish by hand: required custom essay (write it only from the
