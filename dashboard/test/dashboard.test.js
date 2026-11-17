@@ -117,3 +117,21 @@ test('server: setup, login, hooks, pause, gates, messages', async (t) => {
   const w = await waitP;
   assert.equal(w.body.messages[0].text, 'cap 10');
 });
+
+test('bots: sync, commands, results, person allowlist, LinkedIn refused', () => {
+  const { createBots } = require('../lib/bots');
+  const events = [];
+  const bots = createBots({ onEvent: (e) => events.push(e) });
+  bots.sync({ botId: 'abc123-window', state: { person: 'avash-chapagain', personLabel: 'Avash', persons: [{ id: 'avash-chapagain' }, { id: 'carlos-x' }] } });
+  const b = bots.list()[0];
+  assert.deepEqual(b.state.persons.map((p) => p.id), ['avash-chapagain']);
+  assert.throws(() => bots.enqueue(b.botId, 'filter', { value: 'linkedin' }), /LinkedIn/);
+  assert.throws(() => bots.enqueue(b.botId, 'person', { value: 'carlos-x' }), /Avash or Lewis/);
+  assert.throws(() => bots.enqueue(b.botId, 'evil'), /unknown/);
+  const c = bots.enqueue(b.botId, 'loadSheet');
+  const out = bots.sync({ botId: b.botId });
+  assert.equal(out.commands[0].cmd, 'loadSheet');
+  bots.sync({ botId: b.botId, results: [{ id: c.id, ok: true, message: 'Loaded 22 jobs' }] });
+  assert.equal(bots.list()[0].commands[0].status, 'done');
+  assert.ok(events.some((e) => /Loaded 22 jobs/.test(e.summary)));
+});

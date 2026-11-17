@@ -67,6 +67,7 @@
     es.addEventListener('state', (e) => { state = JSON.parse(e.data); renderState(); });
     es.addEventListener('event', (e) => { const ev = JSON.parse(e.data); addEvents([ev], true); if (ev.kind === 'say' || ev.kind === 'user' || ev.kind === 'stop') loadThread(); });
     es.addEventListener('shot', () => renderShot(true));
+    es.addEventListener('bots', (e) => { botsData = JSON.parse(e.data).bots || []; renderBots(); });
     es.addEventListener('question', () => notify('New question from the agent', 'Open the Inbox to answer.'));
     es.addEventListener('approval', () => notify('Approval needed', 'The agent is waiting for your OK.'));
   }
@@ -215,6 +216,83 @@
     }
   });
 
+  // ---------------- bots (bot bridge) ----------------
+  let botsData = [];
+  async function loadBots() { const r = await api('/api/bots'); botsData = r.bots; renderBots(); }
+  const CONFIRM = {
+    start: 'Start the batch on this bot?', stop: 'Stop the batch?', skip: 'Skip the row the bot is working on?',
+    rowApply: 'Open and apply this row now?', rowMarkApplied: 'Mark this row applied? Only do this after you saw a real confirmation page.',
+    rowRemove: 'Remove this row from the queue?', person: 'Switch the active person in this bot?',
+  };
+  function seg(bot, cmd, current, options) {
+    return `<div class="chips">${options.map(([v, l]) => `<button class="chip${String(current) === String(v) ? ' on' : ''}" data-bot="${esc(bot)}" data-cmd="${cmd}" data-value="${esc(v)}">${esc(l)}</button>`).join('')}</div>`;
+  }
+  function renderBots() {
+    if ($('tab-bots').hidden) return;
+    if ($('botsList').contains(document.activeElement) && document.activeElement.tagName === 'SELECT') return;
+    if (!botsData.length) {
+      $('botsList').innerHTML = '<div class="card"><h2>No bot window connected</h2><p class="muted">Open the BrightStar Bid Bot window in Avash\'s or Lewis\'s Chrome profile on the server (after the bot update is loaded). It connects within a few seconds.</p></div>';
+      return;
+    }
+    $('botsList').innerHTML = botsData.map((b) => {
+      const s = b.state || {}; const id = b.botId; const c = s.counters || {}; const bt = s.batch || {};
+      const counters = ['queue', 'pending', 'done', 'applied', 'skipped', 'error'].map((k) => `<div class="ctr"><b>${esc(c[k] ?? '–')}</b><span>${k}</span></div>`).join('');
+      const rows = (s.rows || []).map((r) => `<li class="qrow">
+          <div class="qmain"><b>#${esc(r.row)}</b> ${esc(r.company || '')} <span class="muted">· ${esc(r.title || '')}</span>
+            <div class="muted small">${esc(r.source || '')} · <span class="st st-${esc(String(r.status || '').toLowerCase().replace(/\W+/g, '-'))}">${esc(r.status || '')}</span>${r.link ? ` · <a href="${esc(r.link)}" target="_blank" rel="noopener noreferrer">job</a>` : ''}</div></div>
+          <div class="qacts">
+            ${(r.actions || []).includes('apply') ? `<button class="btn small" data-bot="${esc(id)}" data-cmd="rowApply" data-row="${esc(r.key)}">Apply</button>` : ''}
+            ${(r.actions || []).includes('markApplied') ? `<button class="btn small good" data-bot="${esc(id)}" data-cmd="rowMarkApplied" data-row="${esc(r.key)}">Mark applied</button>` : ''}
+            ${(r.actions || []).includes('remove') ? `<button class="btn small danger" data-bot="${esc(id)}" data-cmd="rowRemove" data-row="${esc(r.key)}">✕</button>` : ''}
+          </div></li>`).join('');
+      const filters = (s.filters || []).filter((f) => !/linkedin/i.test(f.id + f.label)).map((f) => [f.id, f.label + (f.count != null ? ` (${f.count})` : '')]);
+      const persons = (s.persons || []).map((p) => `<option value="${esc(p.id)}"${p.id === s.person ? ' selected' : ''}>${esc(p.label)}</option>`).join('');
+      const tabs = (s.captureTabs || []).map((t) => `<option${t === s.captureTab ? ' selected' : ''}>${esc(t)}</option>`).join('');
+      const cmds = (b.commands || []).slice(0, 5).map((x) => `<li class="${x.status === 'error' ? 'fail' : ''}"><span class="ic">${x.status === 'done' ? '✅' : x.status === 'error' ? '⚠️' : '⏳'}</span><span class="tx">${esc(x.label)}${x.args && x.args.value != null ? ' → ' + esc(x.args.value) : ''}${x.result ? ' · ' + esc(x.result) : ''}</span><span class="tm">${hhmm(x.ts)}</span></li>`).join('');
+      return `<div class="card bot">
+        <div class="row-between"><h2>${esc(b.label || b.person || 'Bot')} <span class="dot ${b.online ? 'on' : ''}" title="${b.online ? 'online' : 'offline'}"></span></h2>
+          <button class="btn ghost small" data-bot="${esc(id)}" data-cmd="refresh">↻</button></div>
+        <p class="status-text">${esc(s.status || '')}</p>
+        ${s.nowWorking ? `<p class="muted small">Now: ${esc(s.nowWorking)}</p>` : ''}
+        <div class="ctrs">${counters}</div>
+        <div class="btnrow">
+          <button class="btn primary" data-bot="${esc(id)}" data-cmd="start" ${bt.canStart === false ? 'disabled' : ''}>Start</button>
+          ${bt.paused ? `<button class="btn good" data-bot="${esc(id)}" data-cmd="resume">Resume</button>` : `<button class="btn" data-bot="${esc(id)}" data-cmd="pause" ${bt.running ? '' : 'disabled'}>Pause</button>`}
+          <button class="btn" data-bot="${esc(id)}" data-cmd="skip" ${bt.running ? '' : 'disabled'}>Skip row</button>
+          <button class="btn danger" data-bot="${esc(id)}" data-cmd="stop" ${bt.running || bt.paused ? '' : 'disabled'}>Stop</button>
+        </div>
+        <h3>Load jobs</h3>
+        <div class="btnrow"><button class="btn" data-bot="${esc(id)}" data-cmd="loadSheet">Load from sheet</button></div>
+        ${tabs ? `<label>Capture tab <select data-bot="${esc(id)}" data-cmd="captureTab">${tabs}</select></label>` : ''}
+        <p class="muted small">Source: ${esc(s.source || '?')}${s.sheetName ? ' · ' + esc(s.sheetName) : ''}</p>
+        <h3>Source filter</h3>${seg(id, 'filter', s.filter, filters)}
+        <h3>Batch mode</h3>${seg(id, 'batchMode', s.batchMode, [['generate', 'Generate'], ['apply', 'Generate + Apply']])}
+        <h3>Options</h3>
+        ${seg(id, 'autoSubmit', s.autoSubmit ? 'on' : 'off', [['on', 'Auto submit ON'], ['off', 'Auto submit OFF']])}
+        ${seg(id, 'autofill', s.autofill ? 'on' : 'off', [['on', 'Autofill ON'], ['off', 'Autofill OFF']])}
+        ${persons ? `<label>Person <select data-bot="${esc(id)}" data-cmd="person">${persons}</select></label>` : ''}
+        <h3>Queue <span class="muted small">(${(s.rows || []).length}${s.rowsTotal > (s.rows || []).length ? ' of ' + s.rowsTotal : ''} shown)</span></h3>
+        <ol class="queue">${rows || '<li class="muted">Queue empty.</li>'}</ol>
+        ${cmds ? `<h3>Recent commands</h3><ol class="feed">${cmds}</ol>` : ''}
+        <p class="muted small">Updated ${ago(s.ts || b.lastSeen)}</p>
+      </div>`;
+    }).join('');
+  }
+  async function botCmd(bot, cmd, args) {
+    if (CONFIRM[cmd] && !confirm(CONFIRM[cmd])) return;
+    if (cmd === 'autoSubmit' && args.value === 'on' && !confirm('Turn ON auto submit? The bot will submit applications on adapter sites by itself.')) return;
+    try { await api(`/api/bots/${bot}/command`, { method: 'POST', body: { cmd, args } }); } catch (err) { alert(err.message); }
+  }
+  $('botsList').addEventListener('click', (e) => {
+    const el = e.target.closest('[data-cmd]'); if (!el || el.tagName === 'SELECT') return;
+    const args = {}; if (el.dataset.value != null) args.value = el.dataset.value; if (el.dataset.row != null) args.row = el.dataset.row;
+    botCmd(el.dataset.bot, el.dataset.cmd, args);
+  });
+  $('botsList').addEventListener('change', (e) => {
+    const el = e.target.closest('select[data-cmd]'); if (!el) return;
+    botCmd(el.dataset.bot, el.dataset.cmd, { value: el.value }); el.blur();
+  });
+
   // ---------------- runs ----------------
   async function loadRuns() {
     const runs = await api('/api/runs');
@@ -299,6 +377,7 @@
     document.querySelectorAll('.tabs button').forEach((x) => x.classList.toggle('on', x === b));
     document.querySelectorAll('.tab').forEach((t) => { t.hidden = t.id !== 'tab-' + b.dataset.tab; });
     if (b.dataset.tab === 'runs') loadRuns();
+    if (b.dataset.tab === 'bots') loadBots();
     if (b.dataset.tab === 'settings') loadSettings();
     if (b.dataset.tab === 'approve') loadApprHist();
     if (b.dataset.tab === 'inbox') loadThread();

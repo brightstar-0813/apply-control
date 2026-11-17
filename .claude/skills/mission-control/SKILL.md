@@ -27,6 +27,15 @@ The user's primary channel (user decision 2026-11-17). Slack stays as a mirror a
   last session with `claude -p --resume` and the messages as the prompt. Nobody is at the
   terminal then: ask questions in the final message, never wait for terminal input.
 
+## Bot controls in the dashboard (Bots tab, 2026-11-17)
+
+The bot window in each enabled profile runs `dashboard-bridge.js` (bot repo). From the dashboard the user
+can Load from sheet, Start/Pause/Skip/Stop, set filter, Batch mode, auto submit and autofill, switch
+person (Avash/Lewis only), and press row Apply / Mark applied / Remove. The bridge clicks the bot's own
+controls; nothing else changes. These clicks show in the feed as `You → <person>: …` and count as the
+user's decisions (rule 3/4): don't undo them, and re-read bot state before your next bot action.
+The bridge needs the bot window open (`popup.html?ctx=window`); closing it takes that bot offline.
+
 ## What you do
 
 ```

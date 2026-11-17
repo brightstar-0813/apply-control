@@ -11,6 +11,8 @@ const { redact, redactString, summarize, clip } = require('./lib/redact');
 const { createTailer } = require('./lib/transcript');
 const { createRunner } = require('./lib/runner');
 const { parseQuestion } = require('./lib/questions');
+const { createBots } = require('./lib/bots');
+const BOT_ORIGIN = 'chrome-extension://jkhoiaahamddiojkmhhpnnjnkdjiiigj';
 
 let cfg = config.load();
 const db = open(config.DATA_DIR);
@@ -60,6 +62,14 @@ function agentIdle() {
   if (waiters.size) return false;
   if (!S.busy) return true;
   return Date.now() - db.get('lastEventTs', 0) > 20 * 60e3 && !db.pendingApprovals().length && !S.paused;
+}
+
+// ---------- bot bridge ----------
+const bots = createBots({ onEvent: (e) => addEvent(e) });
+let botsPushTimer = null;
+function throttledBotsPush() {
+  if (botsPushTimer) return;
+  botsPushTimer = setTimeout(() => { botsPushTimer = null; broadcast('bots', { bots: bots.list() }); }, 1000);
 }
 
 // ---------- runner (phase 4) ----------
@@ -306,6 +316,20 @@ async function route(req, res) {
   const p = url.pathname;
   const m = req.method;
 
+  // Bot bridge: only the bot extension, only directly on this machine (never via the Funnel proxy)
+  if (p.startsWith('/bot/')) {
+    const origin = String(req.headers.origin || '');
+    const cors = { 'Access-Control-Allow-Origin': BOT_ORIGIN, 'Access-Control-Allow-Headers': 'Content-Type', 'Access-Control-Allow-Methods': 'POST, OPTIONS', Vary: 'Origin' };
+    if (isRemote(req) || origin !== BOT_ORIGIN) return send(res, 403, { error: 'local bot only' });
+    if (m === 'OPTIONS') return send(res, 204, '', cors);
+    if (p === '/bot/sync' && m === 'POST') {
+      const out = bots.sync(await readBody(req));
+      throttledBotsPush();
+      return send(res, 200, out, cors);
+    }
+    return send(res, 404, { error: 'not found' }, cors);
+  }
+
   // Hook + CLI endpoints (shared secret; never exposed meaningfully without the token)
   if (p.startsWith('/hook/') || p.startsWith('/cli/')) {
     if (!hookAuthed(req)) return send(res, 401, { error: 'bad token' });
@@ -491,6 +515,12 @@ async function route(req, res) {
   if (p === '/api/screenshot') {
     if (!fs.existsSync(SHOT)) return send(res, 404, 'no screenshot yet');
     return send(res, 200, fs.readFileSync(SHOT), { 'Content-Type': db.get('shotMime', 'image/jpeg') });
+  }
+  if (p === '/api/bots' && m === 'GET') return send(res, 200, { bots: bots.list(), commands: bots.COMMANDS });
+  if ((mm = p.match(/^\/api\/bots\/([\w-]{6,64})\/command$/)) && m === 'POST') {
+    const b = await readBody(req);
+    try { const c = bots.enqueue(mm[1], String(b.cmd || ''), b.args); throttledBotsPush(); return send(res, 200, { ok: true, id: c.id }); }
+    catch (e) { return send(res, 400, { error: e.message }); }
   }
   if (p === '/api/runs') return send(res, 200, listRuns());
   if ((mm = p.match(/^\/api\/runs\/([\w.-]+\.md)$/))) {

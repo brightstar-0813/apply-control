@@ -138,6 +138,24 @@ input:focus, textarea:focus, select:focus { outline: 2px solid var(--accent); ou
 .appr .acts { display: flex; gap: 8px; }
 .appr .acts .btn { flex: 1; }
 
+/* bots */
+.bot h3 { font-size: 13px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); margin: 14px 0 6px; }
+.dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--bad); vertical-align: middle; }
+.dot.on { background: var(--ok); }
+.ctrs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin: 8px 0; }
+.ctr { background: var(--surface-2); border-radius: 8px; padding: 6px 8px; text-align: center; }
+.ctr b { display: block; font-size: 18px; font-variant-numeric: tabular-nums; }
+.ctr span { font-size: 11px; color: var(--muted); text-transform: uppercase; }
+.btnrow { display: flex; gap: 8px; flex-wrap: wrap; }
+.btnrow .btn { flex: 1; min-width: 90px; }
+.queue { list-style: none; margin: 0; padding: 0; max-height: 28em; overflow: auto; }
+.qrow { display: flex; gap: 8px; justify-content: space-between; align-items: center; padding: 7px 0; border-top: 1px solid var(--border); font-size: 13.5px; }
+.qrow:first-child { border-top: 0; }
+.qmain { min-width: 0; overflow-wrap: anywhere; }
+.qacts { display: flex; gap: 4px; flex-shrink: 0; }
+.qacts .btn { min-height: 32px; padding: 2px 8px; font-size: 12.5px; }
+.st-applied { color: var(--ok); } .st-error, .st-failed { color: var(--bad); } .st-pending { color: var(--muted); }
+
 /* runs / settings lists */
 .list li { padding: 10px 0; border-top: 1px solid var(--border); }
 .list li:first-child { border-top: 0; }

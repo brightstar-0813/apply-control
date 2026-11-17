@@ -89,6 +89,12 @@
       </div>
     </section>
 
+    <section id="tab-bots" class="tab" hidden>
+      <div id="botsList"></div>
+      <p class="muted small">Buttons press the bot's own controls in its window (Chrome profile on the server).
+        The bot window must be open. LinkedIn is never offered (rule 11).</p>
+    </section>
+
     <section id="tab-inbox" class="tab" hidden>
       <div id="questions"></div>
       <div class="card chat">
@@ -154,10 +160,11 @@
 
     <nav class="tabs">
       <button data-tab="live" class="on">Live</button>
+      <button data-tab="bots">Bots</button>
       <button data-tab="inbox">Inbox <b id="badgeInbox" class="badge" hidden></b></button>
       <button data-tab="approve">Approve <b id="badgeAppr" class="badge" hidden></b></button>
       <button data-tab="runs">Runs</button>
-      <button data-tab="settings">Settings</button>
+      <button data-tab="settings">More</button>
     </nav>
   </div>
   <script src="app.js"></script>
