@@ -9,6 +9,10 @@ The user wants to steer runs from the Slack channel where the bot posts its aler
 (DM `louis.michael9523`, workspace "Bid Bot"). Claude is the listener; the bot itself
 still only posts (webhook, one-way).
 
+**Since 2026-11-17 the Mission Control dashboard is the primary channel** (`mission-control`):
+questions, status and waiting go there first; this skill is the mirror and the fallback when the
+dashboard is down. Q<n> numbering and the "Act on replies" rules below apply to both.
+
 ## Slack-live sessions and stopping (user decision 2026-11-15)
 
 - **Slack-live** = flag file `runs/.slack-live` exists. `apply-run` creates it at session start

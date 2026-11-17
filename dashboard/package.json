@@ -1,0 +1,10 @@
+{
+  "name": "bidbot-mission-control",
+  "private": true,
+  "description": "Web dashboard + remote control for the Claude agent that runs BrightStar Bid Bot sessions",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test test/"
+  },
+  "engines": { "node": ">=22.5" }
+}

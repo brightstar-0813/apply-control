@@ -17,7 +17,8 @@ learned so the next run goes further.
 | Run an apply session end to end | `apply-run` |
 | One-command start: `/bid <person> <source> [cap]` or `/<person>-<source>-bid [cap]` (avash/lewis × dice, greenhouse, workday, builtin, himalayas, jobright, other, all) | `bid` |
 | Something blocked an application | `blocker-fix` |
-| Ask the user / take their answers via the Slack channel | `slack-chat` |
+| Status, questions, user messages, Pause/Stop/approvals via the web dashboard (primary channel) | `mission-control` |
+| Ask the user / take their answers via the Slack channel (mirror + fallback) | `slack-chat` |
 | Site-specific behaviour | `site-<name>` (dice, indeed, greenhouse, workday, lever, ashby, jobgether, jobright, himalayas, builtin, other) |
 | A site has no skill yet | copy `templates/site-skill/` (see `blocker-fix`) |
 
