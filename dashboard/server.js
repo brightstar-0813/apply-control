@@ -12,6 +12,7 @@ const { createTailer } = require('./lib/transcript');
 const { createRunner } = require('./lib/runner');
 const { parseQuestion } = require('./lib/questions');
 const { createBots } = require('./lib/bots');
+const { createSlack } = require('./lib/slack');
 const BOT_ORIGIN = 'chrome-extension://jkhoiaahamddiojkmhhpnnjnkdjiiigj';
 
 let cfg = config.load();
@@ -64,6 +65,16 @@ function agentIdle() {
   return Date.now() - db.get('lastEventTs', 0) > 20 * 60e3 && !db.pendingApprovals().length && !S.paused;
 }
 
+// ---------- slack pings (only what needs the user) ----------
+const slack = createSlack({ getCfg: () => cfg, onEvent: (e) => addEvent(e) });
+function pingQuestion(q) {
+  const first = q.text.split('\n').map((l) => l.trim()).filter(Boolean)[0] || q.qid;
+  slack.notify('q:' + q.qid + ':' + first.slice(0, 40), `:bell: *Claude needs you* - ${first.slice(0, 300)}\nAnswer in the dashboard (Inbox).`, 10 * 60e3);
+}
+function pingApproval(id, label, sum) {
+  slack.notify('a:' + id, `:shield: *Approval needed* (${label}): ${String(sum).slice(0, 200)}\nApprove or deny in the dashboard (Approve tab). Auto-denied after 30 min.`, 60e3);
+}
+
 // ---------- bot bridge ----------
 const bots = createBots({ onEvent: (e) => addEvent(e) });
 let botsPushTimer = null;
@@ -77,7 +88,7 @@ const runner = createRunner({
   cfg,
   onEvent: (e) => addEvent(e),
   onSession: (id) => { db.set('session', id); pushState(); },
-  onExit: () => { db.set('busy', false); pushState(); setTimeout(maybeWake, 1500); },
+  onExit: (d) => { if (d && d.code) slack.notify('runner-fail', `:warning: *Headless run failed* (exit ${d.code}). Check the dashboard.`, 10 * 60e3); db.set('busy', false); pushState(); setTimeout(maybeWake, 1500); },
 });
 
 function wakePrompt(msgs) {
@@ -191,6 +202,7 @@ function handleHook(body) {
         const id = db.addApproval({ session, gate: g.label, tool, summary: sum, detail: clip(JSON.stringify(redact(input)), 4000) });
         addEvent({ kind: 'approval', session, tool, summary: `Needs approval (${g.label}): ${sum}` });
         broadcast('approval', { id });
+        pingApproval(id, g.label, sum);
         pushState();
         return { action: 'wait', approvalId: id };
       }
@@ -223,6 +235,7 @@ function handleHook(body) {
           if (old) db.answerQuestion(old.id, '(superseded)');
           db.addQuestion(q.qid, q.text, q.options);
           broadcast('question', { qid: q.qid });
+          pingQuestion(q);
         }
       }
       addEvent({ kind: 'stop', session, summary: 'Agent stopped - waiting for you' + (msg ? ': ' + clip(msg.split('\n').filter(Boolean).pop(), 300) : '') });
@@ -323,7 +336,7 @@ async function route(req, res) {
     if (isRemote(req) || origin !== BOT_ORIGIN) return send(res, 403, { error: 'local bot only' });
     if (m === 'OPTIONS') return send(res, 204, '', cors);
     if (p === '/bot/sync' && m === 'POST') {
-      const out = bots.sync(await readBody(req));
+      const out = { ...bots.sync(await readBody(req)), publicUrl: cfg.publicUrl || null };
       throttledBotsPush();
       return send(res, 200, out, cors);
     }
@@ -344,7 +357,7 @@ async function route(req, res) {
       const b = await readBody(req); const text = clip(redactString(String(b.text || '')), 6000);
       db.addMessage('agent', text, true); addEvent({ kind: 'say', summary: text });
       const q = parseQuestion(text);
-      if (q) { const old = db.questionByQid(q.qid); if (old) db.answerQuestion(old.id, '(superseded)'); db.addQuestion(q.qid, q.text, q.options); }
+      if (q) { const old = db.questionByQid(q.qid); if (old) db.answerQuestion(old.id, '(superseded)'); db.addQuestion(q.qid, q.text, q.options); pingQuestion(q); }
       pushState(); return send(res, 200, { ok: true });
     }
     if (p === '/cli/wait' && m === 'GET') {
@@ -542,7 +555,10 @@ function deliverToWaiters() {
 
 // Expire approvals left pending > 30 min (the hook gives up at ~29 min anyway).
 setInterval(() => {
-  for (const a of db.pendingApprovals()) if (Date.now() - a.ts > 30 * 60e3) { db.decideApproval(a.id, 'expired'); pushState(); }
+  for (const a of db.pendingApprovals()) {
+    if (Date.now() - a.ts > 30 * 60e3) { db.decideApproval(a.id, 'expired'); pushState(); }
+    else if (Date.now() - a.ts > 10 * 60e3) slack.notify('a-remind:' + a.id, `:hourglass: Still waiting for your approval: ${String(a.summary).slice(0, 160)}`, 60 * 60e3);
+  }
 }, 60e3).unref();
 
 const server = http.createServer((req, res) => {

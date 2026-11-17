@@ -7,6 +7,9 @@
 $ErrorActionPreference = 'SilentlyContinue'
 $root = Split-Path -Parent $PSScriptRoot
 if (-not (Test-Path (Join-Path $root 'runs\.slack-live'))) { exit 0 }
+# Mission Control up -> it sends a short "Claude needs you" ping with the dashboard link instead
+# (user 2026-11-17: Slack only for things that need the user). This full post is the fallback.
+try { Invoke-WebRequest -UseBasicParsing -TimeoutSec 2 -Uri 'http://127.0.0.1:8787/api/me' | Out-Null; exit 0 } catch {}
 
 # Hook input is UTF-8 JSON; the console default (OEM codepage) garbled en dashes in Slack.
 $raw = (New-Object IO.StreamReader([Console]::OpenStandardInput(), (New-Object Text.UTF8Encoding($false)))).ReadToEnd()

@@ -13,6 +13,13 @@ still only posts (webhook, one-way).
 questions, status and waiting go there first; this skill is the mirror and the fallback when the
 dashboard is down. Q<n> numbering and the "Act on replies" rules below apply to both.
 
+**Slack = only what needs the user (user decision 2026-11-17).** While the dashboard is up, Claude
+does **not** post to Slack by hand at all. The dashboard sends short pings with its link for: a new
+`Q<n>` question, an approval waiting (plus a 10-min reminder), a failed headless run. The bot sends
+only its ⛔ alerts (batch paused / failed / required field), with an "Open Mission Control" link
+(bot `slack_level` = `action`, the default; `all` restores per-job status, duplicates and batch-complete posts).
+The "What to send" list below applies **only when the dashboard is down**.
+
 ## Slack-live sessions and stopping (user decision 2026-11-15)
 
 - **Slack-live** = flag file `runs/.slack-live` exists. `apply-run` creates it at session start
@@ -43,7 +50,7 @@ powershell -NoProfile -File scripts/slack-post.ps1 -Text "<message>"
 - **Questions get an id**: `Q<n>` counting up through the session, plus person and row:
   `Q3 (Avash #24 Parking Mgmt, Himalayas): "Are you willing to work hybrid in Austin?" Options: Yes / No. Reply "Q3 Yes".`
   Give the options when there are any, and say what you'll do meanwhile ("skipping to the next row").
-- What to send:
+- What to send (dashboard down only; keep it to things that need the user):
   - Session start: person, filter, cap, batch mode, submit setting, queue counts.
   - The queue for review (rule 4) when the user isn't at the terminal; wait for "go" in Slack.
   - Every rule-5 answer you lack, and any **unclear form question** (ambiguous wording, no option

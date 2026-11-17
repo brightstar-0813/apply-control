@@ -17,6 +17,8 @@ const DEFAULTS = {
   hookToken: null,             // shared secret hook.js / cli.js -> server
   setupToken: null,            // one-time token to set the password (local only)
   sessionDays: 30,
+  publicUrl: null,            // e.g. https://bidbot.<tailnet>.ts.net (used in Slack pings)
+  slack: { enabled: true },   // pings only for things that need the user
   runner: {
     enabled: true,
     autoWake: true,            // dashboard message while agent idle -> resume session headless

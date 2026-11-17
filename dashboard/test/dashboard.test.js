@@ -10,7 +10,7 @@ const { spawn } = require('node:child_process');
 const DATA = fs.mkdtempSync(path.join(os.tmpdir(), 'bbdash-'));
 const PORT = 18000 + Math.floor(Math.random() * 1000);
 process.env.BIDBOT_DASH_DATA = DATA;
-fs.writeFileSync(path.join(DATA, 'config.json'), JSON.stringify({ port: PORT, runner: { enabled: false } }));
+fs.writeFileSync(path.join(DATA, 'config.json'), JSON.stringify({ port: PORT, runner: { enabled: false }, slack: { enabled: false } }));
 
 const { parseQuestion } = require('../lib/questions');
 const { redact, summarize } = require('../lib/redact');

@@ -50,7 +50,7 @@ browser ──HTTPS──► Tailscale Funnel ──► 127.0.0.1:8787  server.j
 ## Operate
 
 - Logs: `%LOCALAPPDATA%\bidbot-dashboard\server.log`
-- Restart: `Stop-ScheduledTask BidBotMissionControl; Start-ScheduledTask BidBotMissionControl`
+- Restart: `powershell -NoProfile -ExecutionPolicy Bypass -File dashboard\restart.ps1`
 - Forgot password: delete `passwordHash` from `%LOCALAPPDATA%\bidbot-dashboard\config.json`,
   restart, then do setup step 2 again.
 - Stop public access: `tailscale funnel --bg off`
