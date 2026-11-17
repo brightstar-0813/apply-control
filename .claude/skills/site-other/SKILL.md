@@ -89,6 +89,11 @@ description: Host → site-skill routing table for BrightStar Bid Bot apply tabs
   - Resume/attachments: unhide both `input[type=file]` via style, re-snapshot, `upload_file` (resume, then cover letter).
   - **The sticky Previous / Finish later / Next bar overlaps fields**: scroll the target into the middle before clicking or you
     hit Previous (answers survive).
+  - Each new apply tab asks for its **own** email code, even with another ADP tab signed in. Outlook search
+    `SecurityServices_NoReply@adp.com` and open the **newest time** (threads group codes; the old code stays on top of the
+    "verification code" search for a while). Later applications reuse the profile (address, Self-ID) — still check it.
+  - Multi-select questions (e.g. "Which Salesforce certification(s)"): the menu closes after each pick; **click the
+    combobox with the click tool** before each option (a script `click()` doesn't reopen it). Picked = "Remove <option>" buttons.
   - Questions: radios + text; desired salary needs **currency USD** too. Self-attest: checkbox (focus + Space) **and** a
     "Please type your full name" box before Submit.
   - Done = "Thank You! We have received your application" or "Application Submitted!". An optional **WOTC** tax-credit
