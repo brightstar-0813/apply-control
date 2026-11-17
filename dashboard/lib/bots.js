@@ -20,6 +20,7 @@ const COMMANDS = {
   rowMarkApplied: ['Mark row applied', true],
   rowRemove: ['Remove row', true],
   captureTab: ['Set capture tab', false],
+  sheetUrl: ['Set jobs sheet link', false],
   refresh: ['Refresh state', false],
 };
 const NEVER_FILTERS = /linkedin/i; // CLAUDE.md rule 11
@@ -58,6 +59,8 @@ function createBots({ onEvent }) {
     if (!COMMANDS[cmd]) throw new Error('unknown command');
     if (Date.now() - (b.lastSeen || 0) > 20e3) throw new Error('bot window is offline (open the bot window in that Chrome profile)');
     args = args && typeof args === 'object' ? args : {};
+    if (cmd === 'sheetUrl' && !/^https:[/][/]docs[.]google[.]com[/]spreadsheets[/]d[/][A-Za-z0-9_-]{10,}/.test(String(args.value || ''))) throw new Error('not a Google Sheets link');
+    if (cmd === 'captureTab' && !String(args.value || '').trim()) throw new Error('capture tab is empty');
     if (cmd === 'person' && !ENABLED_PERSONS.has(String(args.value || ''))) throw new Error('only Avash or Lewis can be selected');
     if (cmd === 'filter' && NEVER_FILTERS.test(String(args.value || ''))) throw new Error('LinkedIn filter is never used (rule 11)');
     const c = { id: seq++, cmd, args, label: COMMANDS[cmd][0], status: 'queued', ts: Date.now() };

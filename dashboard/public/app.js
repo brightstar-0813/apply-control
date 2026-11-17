@@ -246,7 +246,7 @@
   }
   function renderBots() {
     if ($('tab-bots').hidden) return;
-    if ($('botsList').contains(document.activeElement) && document.activeElement.tagName === 'SELECT') return;
+    if ($('botsList').contains(document.activeElement) && ['SELECT', 'INPUT'].includes(document.activeElement.tagName)) return;
     if (!botsData.length) {
       $('botsList').innerHTML = '<div class="card"><h2>No bot window connected</h2><p class="muted">Open the BrightStar Bid Bot window in Avash\'s or Lewis\'s Chrome profile on the server (after the bot update is loaded). It connects within a few seconds.</p></div>';
       return;
@@ -280,8 +280,13 @@
         </div>
         <h3>Load jobs</h3>
         <div class="btnrow"><button class="btn" data-bot="${esc(id)}" data-cmd="loadSheet">Load from sheet</button></div>
-        ${tabs ? `<label>Capture tab <select data-bot="${esc(id)}" data-cmd="captureTab">${tabs}</select></label>` : ''}
-        <p class="muted small">Source: ${esc(s.source || '?')}${s.sheetName ? ' · ' + esc(s.sheetName) : ''}</p>
+        <label>Jobs sheet link
+          <span class="inrow"><input type="url" data-field="sheetUrl" value="${esc(s.sheetUrl || '')}" placeholder="https://docs.google.com/spreadsheets/d/…" autocomplete="off">
+          <button class="btn small" data-bot="${esc(id)}" data-save="sheetUrl">Save</button></span></label>
+        <label>Capture tab
+          <span class="inrow"><input type="text" data-field="captureTab" value="${esc(s.captureTab || '')}" placeholder="US-SF-Jobs" autocomplete="off">
+          <button class="btn small" data-bot="${esc(id)}" data-save="captureTab">Save</button></span></label>
+        <p class="muted small">Source: ${esc(s.source || '?')}${s.sheetName ? ' · tab ' + esc(s.sheetName) : ''} · Save first, then Load from sheet.</p>
         <h3>Source filter</h3>${seg(id, 'filter', s.filter, filters)}
         <h3>Batch mode</h3>${seg(id, 'batchMode', s.batchMode, [['generate', 'Generate'], ['apply', 'Generate + Apply']])}
         <h3>Options</h3>
@@ -301,6 +306,14 @@
     try { await api(`/api/bots/${bot}/command`, { method: 'POST', body: { cmd, args } }); } catch (err) { alert(err.message); }
   }
   $('botsList').addEventListener('click', (e) => {
+    const sv = e.target.closest('[data-save]');
+    if (sv) {
+      const input = sv.parentElement.querySelector('input');
+      const value = input.value.trim();
+      if (!value) { alert('Empty'); return; }
+      botCmd(sv.dataset.bot, sv.dataset.save, { value }).then(() => input.blur());
+      return;
+    }
     const el = e.target.closest('[data-cmd]'); if (!el || el.tagName === 'SELECT') return;
     const args = {}; if (el.dataset.value != null) args.value = el.dataset.value; if (el.dataset.row != null) args.row = el.dataset.row;
     botCmd(el.dataset.bot, el.dataset.cmd, args);
