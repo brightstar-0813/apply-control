@@ -116,6 +116,18 @@ test('server: setup, login, hooks, pause, gates, messages', async (t) => {
   await req('POST', '/api/messages', { text: 'cap 10' }, A);
   const w = await waitP;
   assert.equal(w.body.messages[0].text, 'cap 10');
+
+  // delete / unsend a queued message, clear chat, dismiss all questions
+  await req('POST', '/api/messages', { text: 'oops wrong' }, A);
+  let msgs = (await req('GET', '/api/messages', null, A)).body;
+  const oops = msgs.find((x) => x.text === 'oops wrong');
+  assert.equal((await req('POST', '/api/messages/' + oops.id + '/delete', null, A)).status, 200);
+  assert.equal((await req('GET', '/api/state', null, A)).body.pendingMessages, 0);
+  await runHook({ hook_event_name: 'Stop', session_id: 's1', last_assistant_message: 'Q8: go? Reply "Q8 yes".' });
+  assert.equal((await req('POST', '/api/questions/dismiss-all', null, A)).status, 200);
+  assert.equal((await req('GET', '/api/state', null, A)).body.openQuestions.length, 0);
+  assert.equal((await req('POST', '/api/messages/clear', null, A)).status, 200);
+  assert.equal((await req('GET', '/api/messages', null, A)).body.length, 0);
 });
 
 test('bots: sync, commands, results, person allowlist, LinkedIn refused', () => {

@@ -446,6 +446,15 @@ async function route(req, res) {
     return send(res, 200, { ok: true });
   }
   let mm;
+  if ((mm = p.match(/^\/api\/messages\/(\d+)\/delete$/)) && m === 'POST') {
+    const ok = db.deleteMessage(Number(mm[1])); pushState(); return send(res, ok ? 200 : 404, { ok });
+  }
+  if (p === '/api/messages/clear' && m === 'POST') {
+    const n = db.clearMessages(); addEvent({ kind: 'control', summary: `You cleared the chat (${n} messages)` }); pushState(); return send(res, 200, { ok: true, n });
+  }
+  if (p === '/api/questions/dismiss-all' && m === 'POST') {
+    const n = db.dismissAllQuestions(); pushState(); return send(res, 200, { ok: true, n });
+  }
   if ((mm = p.match(/^\/api\/questions\/(\d+)\/answer$/)) && m === 'POST') {
     const b = await readBody(req);
     const q = db.openQuestions().find((x) => x.id === Number(mm[1]));

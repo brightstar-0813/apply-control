@@ -143,10 +143,14 @@
   async function loadThread() {
     const msgs = await api('/api/messages');
     $('thread').innerHTML = msgs.map((m) => `<li class="${m.author}"><div class="bubble">${esc(m.text)}` +
-      `<span class="meta">${m.author === 'user' ? (m.delivered_ts ? 'delivered ' + hhmm(m.delivered_ts) : 'queued') : 'agent'} · ${hhmm(m.ts)}</span></div></li>`).join('');
+      `<span class="meta">${m.author === 'user' ? (m.delivered_ts ? 'delivered ' + hhmm(m.delivered_ts) : 'queued') : 'agent'} · ${hhmm(m.ts)}` +
+      `<button class="del" data-del="${m.id}" title="${m.author === 'user' && !m.delivered_ts ? 'Unsend' : 'Delete'}" aria-label="Delete message">✕</button></span></div></li>`).join('') ||
+      '<li class="muted small">No messages.</li>';
     if (!$('tab-inbox').hidden) $('thread').lastElementChild?.scrollIntoView({ block: 'end' });
   }
   function renderQuestions() {
+    const n = state.openQuestions.length;
+    $('qBar').hidden = n < 2; $('qCount').textContent = n + ' open questions';
     $('questions').innerHTML = state.openQuestions.map((q) => `
       <div class="card q" data-id="${q.id}">
         <div class="row-between"><h2>${esc(q.qid || 'Question')}</h2><span class="muted small">${ago(q.ts)}</span></div>
@@ -166,6 +170,19 @@
       else return;
       loadThread();
     } catch (err) { alert(err.message); }
+  });
+  $('thread').addEventListener('click', async (e) => {
+    const id = e.target.dataset.del; if (!id) return;
+    const li = e.target.closest('li');
+    try { await api(`/api/messages/${id}/delete`, { method: 'POST' }); li.remove(); } catch (err) { alert(err.message); }
+  });
+  $('chatClear').addEventListener('click', async () => {
+    if (!confirm('Delete all chat messages? Messages not yet delivered to the agent are unsent.')) return;
+    try { await api('/api/messages/clear', { method: 'POST' }); loadThread(); } catch (err) { alert(err.message); }
+  });
+  $('qDismissAll').addEventListener('click', async () => {
+    if (!confirm('Dismiss all open questions?')) return;
+    try { await api('/api/questions/dismiss-all', { method: 'POST' }); } catch (err) { alert(err.message); }
   });
   $('compose').addEventListener('submit', async (e) => {
     e.preventDefault();

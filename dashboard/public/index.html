@@ -96,9 +96,10 @@
     </section>
 
     <section id="tab-inbox" class="tab" hidden>
+      <div class="row-between" id="qBar" hidden><span class="muted small" id="qCount"></span><button id="qDismissAll" class="btn ghost small">Dismiss all</button></div>
       <div id="questions"></div>
       <div class="card chat">
-        <h2>Chat with the agent</h2>
+        <div class="row-between"><h2>Chat with the agent</h2><button id="chatClear" class="btn ghost small">Clear chat</button></div>
         <ol id="thread" class="thread"></ol>
       </div>
       <form id="compose" class="compose">
