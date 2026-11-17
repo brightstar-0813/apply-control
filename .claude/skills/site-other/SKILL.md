@@ -88,7 +88,10 @@ description: Host → site-skill routing table for BrightStar Bid Bot apply tabs
     ArrowDown + Enter on the "…Falls Church, VA, USA" suggestion → city/state/zip/county fill. SMS opt-in checkbox: focus + Space.
   - Resume/attachments: unhide both `input[type=file]` via style, re-snapshot, `upload_file` (resume, then cover letter).
   - **The sticky Previous / Finish later / Next bar overlaps fields**: scroll the target into the middle before clicking or you
-    hit Previous (answers survive).
+    hit Previous (answers survive). Near the page bottom the field can't scroll clear of the bar and a click lands on
+    **Finish later** (drops unsaved answers, back to My Applications → "Saved for Later" → Complete Your Application):
+    open such dropdowns by **focus + Enter** instead, pick the option by snapshot uid, press Escape before the next one.
+    Answers are stored only on **Next**.
   - Each new apply tab asks for its **own** email code, even with another ADP tab signed in. Outlook search
     `SecurityServices_NoReply@adp.com` and open the **newest time** (threads group codes; the old code stays on top of the
     "verification code" search for a while). Later applications reuse the profile (address, Self-ID) — still check it.
