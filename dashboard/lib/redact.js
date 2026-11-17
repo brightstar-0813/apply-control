@@ -22,6 +22,10 @@ function redactString(s) {
   if (typeof s !== 'string') return s;
   for (const v of envSecrets()) s = s.split(v).join('[redacted]');
   for (const re of SECRET_VALUE) s = s.replace(re, '[redacted]');
+  // password = x / PASSWORD: x / BB_PASSWORD='x'
+  s = s.replace(/\b(\w*(?:pass(?:word|wd)?|pwd|secret|token)\w*\s*[=:]\s*)(["']?)[^\s"',;)}]+/gi, '$1$2[redacted]');
+  // password(s) as "x" / password 'x'
+  s = s.replace(/(pass(?:word|wd)?s?\b[^"'`\n]{0,24}?["'`])([^"'`\n]{3,})(["'`])/gi, '$1[redacted]$3');
   return s;
 }
 
