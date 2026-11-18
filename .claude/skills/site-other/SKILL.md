@@ -164,3 +164,13 @@ Aggregator, no adapter; the bot pauses on the listing ("No Next/Submit"). The pa
 `"requiredCountries":["ES"]` (ISO codes) — pre-check pending arc.dev rows with `fetch(<listing url>)` from the bot
 page and Remove rows without `US`. Apply link = `/remote-jobs/j/redirect/<id>` → employer / original board
 (if it lands on linkedin.com → rule 11, skip).
+
+## JazzHR (`*.applytojob.com`) — every form ends in a reCAPTCHA v2 checkbox (2026-11-18)
+The bot fills the form and pauses "A CAPTCHA is on the page"; its own apply tab is closed when the batch moves on.
+Routine: (1) read the bot's tab (ids `resumator-<field>-value`, questionnaire checkboxes `resumator-checkbox-<qid>-1|2`
+= No|Yes) and check the **Cover Letter textarea** — it can hold another row's letter (stale-letter bug) — and that
+the row's own letter isn't cut mid-sentence; (2) open the same URL (without utm) in the **work window**, set the text
+inputs by script (native setter + input/change), unhide `#resumator-resume-value` → `upload_file` → dispatch `change`,
+tick the Yes/No boxes the resume supports, EEO "Decline to answer", veteran/disability from the profile;
+(3) ask the user (`Q<n>`) to tick "I'm not a robot" + SUBMIT APPLICATION; (4) Start twice to move the batch on;
+(5) on "Q<n> done" verify the confirmation text in that tab, then **Mark applied**.
