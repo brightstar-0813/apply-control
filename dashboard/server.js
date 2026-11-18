@@ -392,6 +392,12 @@ async function route(req, res) {
       return;
     }
     if (p === '/cli/state' && m === 'GET') return send(res, 200, stateSnapshot());
+    if (p === '/cli/bots' && m === 'GET') {
+      // read-only bot state for the agent (no rows' links; commands stay the user's)
+      return send(res, 200, bots.list().map((b) => ({ person: b.person, label: b.label, online: b.online,
+        status: b.state && b.state.status, nowWorking: b.state && b.state.nowWorking, batch: b.state && b.state.batch,
+        counters: b.state && b.state.counters })));
+    }
     return send(res, 404, { error: 'not found' });
   }
 

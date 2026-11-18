@@ -49,6 +49,7 @@ function textArg() {
         break;
       }
       case 'state': console.log(JSON.stringify(await call('GET', '/cli/state'), null, 2)); break;
+      case 'bots': console.log(JSON.stringify(await call('GET', '/cli/bots'), null, 2)); break;
       case 'setup-code':
         if (cfg.passwordHash) console.log('Password already set. To reset it, delete passwordHash in ' + config.CONFIG_FILE + ' and restart the server.');
         else console.log(`Open http://localhost:${cfg.port} on this server and enter setup code: ${cfg.setupToken}`);
