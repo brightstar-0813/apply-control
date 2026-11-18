@@ -7,6 +7,11 @@ description: Attach Chrome DevTools MCP to the user's running Chrome, open and b
 
 The MCP server runs with `--autoConnect --categoryExtensions` (`.mcp.json`, pinned
 `chrome-devtools-mcp@1.13.0`). It attaches to the user's **already running** stable Chrome.
+Since 2026-11-18 `.mcp.json` starts it with `node` from a **global install**
+(`npm i -g chrome-devtools-mcp@1.13.0`, ~3 s), not `npx` (npx resolution hit Claude Code's 30 s
+MCP connect timeout in dashboard runs → "chrome-devtools CONNECT_TIMEOUT", no browser tools).
+Every **new** MCP process (each headless dashboard run) triggers Chrome's "Allow remote
+debugging?" prompt again; ask the user to click Allow at the start of the run.
 
 ## Facts on this machine
 
