@@ -56,6 +56,12 @@ Person data comes from the bot (built-in `profiles.js` or the custom copy in tha
    applied/worked here before = No; how did you hear = any option; SMS consent = No (Avash: Yes);
    employed by a client/partner of the company, non-compete / non-solicitation agreement,
    relatives employed there = No (user, 2026-11-18).
+   **EEO / self-identification (user, 2026-11-18, all profiles):** answer with the person's real
+   value (gender, race / ethnicity, Hispanic, veteran, disability, and any other self-ID question)
+   from `profiles/<id>.md` or the bot profile. **Never pick "Decline", "Prefer not to say",
+   "I don't wish to answer", "Choose not to disclose"** or similar. Value unknown or no option
+   fits → ask (`Q<n>`), then save the answer in `profiles/<id>.md` (and the site skill if the
+   wording is site-specific) before going on.
    Details in each `profiles/<id>.md`.
 6. **Human-only blockers stop and ask:** CAPTCHA, MFA/OTP you can't read, login walls,
    identity verification, payment. Leave the tab open. Never bypass bot protection.

@@ -32,7 +32,7 @@ description: Host → site-skill routing table for BrightStar Bid Bot apply tabs
    `take_snapshot` + `fill` / `click` / `upload_file`.
 2. Find the apply entry (Apply / Apply now / I'm interested); prefer guest apply.
 3. Contact from the bot person, resume (+ cover letter) from the row folder, questions from
-   profile / Q&A bank / user, EEO per profile.
+   profile / Q&A bank / user, EEO = exact values per profile (never Decline / Prefer not to say; unknown → ask).
 4. Submit only if the profile allows → confirmation page → row **Mark applied ✓** → Start.
 
 ## Host notes (single sightings; promote to a site skill on repeat)
@@ -171,6 +171,6 @@ Routine: (1) read the bot's tab (ids `resumator-<field>-value`, questionnaire ch
 = No|Yes) and check the **Cover Letter textarea** — it can hold another row's letter (stale-letter bug) — and that
 the row's own letter isn't cut mid-sentence; (2) open the same URL (without utm) in the **work window**, set the text
 inputs by script (native setter + input/change), unhide `#resumator-resume-value` → `upload_file` → dispatch `change`,
-tick the Yes/No boxes the resume supports, EEO "Decline to answer", veteran/disability from the profile;
+tick the Yes/No boxes the resume supports, EEO gender / race / veteran / disability = exact values from `profiles/<id>.md` (never "Decline to answer"; unknown → ask);
 (3) ask the user (`Q<n>`) to tick "I'm not a robot" + SUBMIT APPLICATION; (4) Start twice to move the batch on;
 (5) on "Q<n> done" verify the confirmation text in that tab, then **Mark applied**.

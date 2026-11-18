@@ -12,7 +12,7 @@ description: How to finish an application on Paylocity (recruiting.paylocity.com
 1. **Information:** upload resume first (keep "Fill out application with my resume" ticked — it pre-fills
    all work history), cover letter, name/email/mobile/home phone, address, start date, salary type + range,
    "applied before" / "worked before" / SMS. Education entry (School Name required).
-2. **EEO:** gender, race, veteran, disability (profile; else "I choose not to self-identify").
+2. **EEO:** gender, race, veteran, disability (exact values from `profiles/<id>.md`; never "I choose not to self-identify" — unknown → ask the user).
 3. **Optional identity questions:** leave blank unless the profile has them.
 4. **Review:** "Authorized to work in the US?" (profile) → acknowledgement checkbox → **Submit**.
 
