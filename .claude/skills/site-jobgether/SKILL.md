@@ -5,6 +5,10 @@ description: How to apply via Jobgether (jobgether.com) with BrightStar Bid Bot 
 
 # site-jobgether
 
+> 2026-11-17: titles with "(m/f/d)" or JDs naming Milan / München / "German preferred" / LATAM are not US roles
+> (Qualysoft #264 München, Pirelli #265 Milan, In All Media #273 LATAM). Check `jdText` at a pause and remove/skip them
+> before the bot builds and auto-submits (Lever/Greenhouse adapters submit by themselves).
+
 **Hosts:** `*.jobgether.com` · **Adapter:** `jobgether` (stepBudget 18) · filter: **Other** (`#filterEtc`)
 **Batch (Generate + Apply):** bot reads the job page's external **APPLY** href and opens the
 employer ATS directly ("Apply: Jobgether → <host>…"). Adapter ATS (Workday, Greenhouse, Lever,

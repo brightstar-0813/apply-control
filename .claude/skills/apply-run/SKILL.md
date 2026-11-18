@@ -62,6 +62,12 @@ the Stop hooks relay to both. Terminal messages still work too.
      applying: `#batchStart` again (second attempt exhausts the row) or `#batchSkip`.
    - **External Indeed**: bot fills, never submits; finish on the employer site if allowed, then Mark applied.
 3. Every blocker → `blocker-fix` (fix now, then fix for next time, then log).
+   **Repeats (2026-11-17):** a fresh Load from sheet can bring back rows applied in earlier runs (#191 = #27, #216 = #44,
+   #257 = #205). At each pause, grep `runs/*.md` for the company and search the person's Outlook
+   ("Thank you for applying", "received your application") before applying; same title already applied → Mark skipped
+   "already applied <date>". While paused, also remove pending repeats / non-US rows (Remove is disabled while running).
+   **Skip only at a pause**: `#batchSkip` during generation leaves the ChatGPT chat on the skipped job and the next row's
+   cover letter can fail (#266).
 4. Stop and tell the user on: cap reached, rate-limit / CAPTCHA storms, the same failure 3× on one site.
 
 ## 3b. Run — Batch mode "Generate"
