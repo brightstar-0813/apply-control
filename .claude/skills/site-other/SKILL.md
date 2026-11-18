@@ -92,7 +92,7 @@ description: Host → site-skill routing table for BrightStar Bid Bot apply tabs
     (SAIC, 2026-11-15)
 
 - **ADP Workforce Now** (`workforcenow.adp.com/mascsr/default/mdf/recruitment/recruitment.html?cid=…&jobId=…`), seen twice
-  (MyComputerCareer, Silotech, 2026-11-15): **Apply** → name / email / mobile → **Continue** → "Get your verification code":
+  (MyComputerCareer `cid=43596bb7-dd65-472e-afd5-7e70c43c3f63&jobId=584177`, Silotech, 2026-11-15): **Apply** → name / email / mobile → **Continue** → "Get your verification code":
   pick the **email** radio → code from `SecurityServices_NoReply@adp.com` ("Here's your verification code from ADP"; open the
   newest one, the preview may hide the code) → Verify.
   - Steps: Personal Information → Resume → Questions → Voluntary Self-ID → Review → Self-Attest & Submit.
@@ -104,6 +104,14 @@ description: Host → site-skill routing table for BrightStar Bid Bot apply tabs
     **Finish later** (drops unsaved answers, back to My Applications → "Saved for Later" → Complete Your Application):
     open such dropdowns by **focus + Enter** instead, pick the option by snapshot uid, press Escape before the next one.
     Answers are stored only on **Next**.
+  - 2026-11-18 (Lewis): the board link can be a **closed copy** ("We are no longer accepting applications") — open
+    **Current Openings** on the same `cid` and take the live `jobId` (MCC 590416). The page only renders once its tab is in
+    front (`select_page bringToFront`). **Continue** is an invisible-reCAPTCHA `sdf-button`: if nothing happens, reload the
+    job URL, focus `#guestFirstName` by script, `type_text` each field with Tab, then Enter → "Get your verification code".
+    The `click` tool fails on most ADP controls ("did not become interactive"): focus inputs by id from a script
+    (`PersonalAddress_country`, `…_address_line1`, `…_city`, `…_postalCode`, `question_<n>`, `desiredSalaryId`) and
+    `type_text`; radios are `sdf-radio-button#questionYes_<n>` / `#questionNo_<n>` → click the inner shadow `input`;
+    State and currency are `sdf-select-simple` → click its shadow trigger, then `.click()` the `sdf-select-item`.
   - Each new apply tab asks for its **own** email code, even with another ADP tab signed in. Outlook search
     `SecurityServices_NoReply@adp.com` and open the **newest time** (threads group codes; the old code stays on top of the
     "verification code" search for a while). Later applications reuse the profile (address, Self-ID) — still check it.
@@ -150,3 +158,9 @@ description: Host → site-skill routing table for BrightStar Bid Bot apply tabs
 ## When a host repeats
 
 Handled the same host twice → create `site-<name>` from `templates/site-skill/` (`blocker-fix` §3).
+
+## arc.dev listings (2026-11-18)
+Aggregator, no adapter; the bot pauses on the listing ("No Next/Submit"). The page source carries
+`"requiredCountries":["ES"]` (ISO codes) — pre-check pending arc.dev rows with `fetch(<listing url>)` from the bot
+page and Remove rows without `US`. Apply link = `/remote-jobs/j/redirect/<id>` → employer / original board
+(if it lands on linkedin.com → rule 11, skip).
