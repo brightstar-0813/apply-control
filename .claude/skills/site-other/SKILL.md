@@ -37,6 +37,18 @@ description: Host → site-skill routing table for BrightStar Bid Bot apply tabs
 
 ## Host notes (single sightings; promote to a site skill on repeat)
 
+- **UKG / UltiPro** (`recruiting.ultipro.com/<tenant>/JobBoard/…/OpportunityDetail`): **Apply now** → `signin-us.ultipro.com`
+  (Auth0 log in / **Sign up**: email + password + Continue). The panel's Autofill fills **0**: `detectPageBlocker()` flags
+  any non-Workday password field as "sign-in form" before the credential fill runs. Until that is fixed (needs the
+  user's OK, since it touches account creation), skip the row and log it. (Frontier Energy, 2026-11-18)
+
+- **JazzHR** (`<co>.applytojob.com/apply/<id>/<slug>`; board at `<co>.applytojob.com/apply`): one-page form, the
+  in-page panel detects it. Resume via "Attach resume". Yes/No answers are checkbox pairs. Required **X (Twitter)** field,
+  many required essay boxes, a **"Human Check" reCAPTCHA** (human-only, rule 6) and **SUBMIT APPLICATION** is a link.
+  Prison Fellowship (Himalayas row, 2026-11-18) also requires typing the full legal name to certify the application and
+  that you have read their **Statement of Faith**. That is a personal attestation: ask the user, never sign it. Paused row → log,
+  leave the URL, Skip.
+
 - **BambooHR** (`<co>.bamboohr.com/careers/<id>`): **Apply for This Job** shows a one-page form.
   Custom "*" questions are often required (years-of-X, Trailblazer URL). Custom selects: click the button, then the
   `[role=option]`. Match the education option exactly ("College - Bachelor of Science", not the first "Bachelor").
