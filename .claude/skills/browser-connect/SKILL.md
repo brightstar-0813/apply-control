@@ -100,6 +100,8 @@ Never write storage or send state-changing messages (CLAUDE.md rule 2).
 | Timeout waiting for browser connection | Allow dialog pending — see Connect §2 |
 | "No snapshot found for page N" | MCP restarted / page reloaded → `take_snapshot` first |
 | Generation stuck on "blank ChatGPT chat ready — sending resume" after an extension reload | The AI tab still runs the old (orphaned) content script → reload that ChatGPT tab; the bot continues. **Always reload the AI tab right after reloading the extension** (2026-11-16) |
+| Generation stalls at "sending resume" / "poll timed out (harvest too slow)", `evaluate_script` on the ChatGPT tab times out | **The ChatGPT tab is not the active tab of its window** (a work tab opened with `chrome.exe --profile-directory … <url>` or activated with `select_page bringToFront` took its place → Chrome throttles it). Keep hand-work tabs in a **separate window**: from the bot page `chrome.windows.create({tabId, focused:false})`, then `chrome.tabs.update(<chatgpt tab>, {active:true})`. If it is already frozen: `chrome.tabs.reload(<chatgpt tab id>)` from the bot page, the row continues (2026-11-18) |
+| `#retryErrors` at a pause | It re-queues the error rows **and starts the batch** (state running) — not a passive re-queue (2026-11-18) |
 | Bot window closed mid-batch | Batch keeps running in the SW; reopen with chrome.exe --profile-directory="Profile N" "chrome-extension://…/popup.html?ctx=window" and re-bind |
 | Bot page gone | Extension reloaded or window closed → `new_page …?ctx=window`, re-bind |
 | SW not listed | Asleep — opening the bot page wakes it |
