@@ -34,3 +34,19 @@ SMS = No, any "how did you hear").
 | Symptom | Class | Fix | Added |
 |---------|-------|-----|-------|
 | State won't select | D | Full-list method above | 2026-11-15 |
+| Bot pauses "Required or invalid answer needs review: countryunited states" | B | Country's inner `<input required>` is empty while the select shows "United States" → `input:invalid` false hit. Ignore it; the real gaps are below | 2026-11-18 |
+| Batch autofill leaves step 1 wrong (Lewis #9): applied before = **Yes**, work-history dates as month names ("April"), home address + own phone in every employer block, AI "Reason for Leaving", GPA / Graduation Date full of text; State, start date, salary type, SMS, worked-before empty | B (open) | Fix by hand before Next: dates `MM/YYYY` + employer city/state from the resume PDF (`pdftotext -layout`), clear employer Address 1 / ZIP / phone / reason (not enforced), GPA empty, graduation `MM/YYYY` | 2026-11-18 |
+
+## Script helpers (2026-11-18)
+`fill` / `fill_form` append to existing text and time out on this form. What works:
+- Text inputs: native value setter + `input` + `change` + `blur` (ids like `workHistory.companyPhone.0`,
+  `txt-workHistory-startDate-0`, `public-candidate-work-history-address-0-city`). Exception: **Available to
+  Start** (`info.dateAvailableToStart`) needs real typing (click → `type_text` `11/18/2026` + Tab).
+- Native-looking dropdowns are `div[role=combobox]#<id>` (`info.haveYouAppliedWithUsBefore`, `info.smsOptedIn`,
+  `info.desiredSalaryType`, `info.haveYouWorkedWithUsBefore`, `educationHistory.degreeId.0`,
+  `acknowledgements.eeoGender` …): click the div, then `.click()` the `li[role=option]` **inside the same
+  wrapper** (old menus stay in the DOM), click the div again if still open.
+- State: focus `#public-site-address-us-state`, ArrowDown, click `[role=listitem][title="MI"]` in
+  `#public-site-address-us-state-dropdown-list-container`.
+- Address Line 1 shows "Address is required" until a suggestion is picked: retype it and click the matching option.
+- Success page: `/Recruiting/Jobs/Success/<id>` "Your application has been received!".

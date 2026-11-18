@@ -37,3 +37,12 @@ Ashby) → bot submits. Anything else (Paylocity, Breezy, custom) → bot fills,
 | "Create your Jobgether account" modal filled with name/email/**password** | D (bot bug) | Clicking APPLY while signed out opens a sign-up wall. Fixed: bot no longer clicks APPLY, it opens the href. If seen: Stop, clear the password field (it is inside an `auth.jobgether.com` iframe — use `fill`), close without Sign up | 2026-11-15 |
 | Employer form answers invented (e.g. "$40/hour" rate) or cover-letter field contains `<WritingBlock …>` markup | B | Don't submit; fix answers from profile/Q&A or ask; clear junk text | 2026-11-15 |
 | Audio/video intro required (Vocaroo etc.) | H | User only — skip or ask | 2026-11-15 |
+
+## Pre-check "Remote from" before generation (2026-11-18)
+Each offer page lists **KEY FACTS → "Remote from: <regions>"**. Many rows are LATAM / Europe / Asia / UAE only
+(In All Media, EPAM, Pirelli, C9, Max Accelerate, ClanX …) and each one costs ~7 min of generation before the
+employer form shows it. At queue review or any pause, from a `jobgether.com` tab in the bound profile:
+`fetch('/offer/<slug>')` for every pending Jobgether row (700 ms apart), parse the text after `Remote from:`,
+and **Remove** rows whose regions don't include the United States (410 = listing gone). Read-only on Jobgether;
+never click AUTO APPLY / sign up. In All Media's Breezy forms also show the truth: required
+"Which location are you applying for" lists only LATAM countries.
