@@ -174,13 +174,24 @@ function handleHook(body) {
       pushState();
       return {};
     case 'UserPromptSubmit': {
+      // One agent at a time: a terminal prompt while a headless run works is held, unless 'take over'.
+      if (!headless && runner.running()) {
+        if (/^\s*take\s*over\b/i.test(String(p.prompt || ''))) {
+          runner.kill();
+          addEvent({ kind: 'control', session, summary: 'Terminal took over - headless run stopped' });
+          pushState();
+          return { context: '[Mission Control] You took over from a dashboard-started headless run (now stopped). Check the dashboard feed / run log for what it did last before acting in Chrome.' };
+        }
+        addEvent({ kind: 'control', session, summary: 'Terminal prompt held: a headless run is active' });
+        return { blockPrompt: 'A dashboard-started Claude run is working right now (one agent at a time). Type "take over" to stop it and continue here, or use Stop in the dashboard.' };
+      }
       db.set('busy', true);
       if (!headless && p.prompt) {
         // Terminal and dashboard show one conversation; a terminal reply closes the open question cards.
         const text = redactString(String(p.prompt));
         addEvent({ kind: 'prompt', session, summary: 'You (terminal): ' + clip(text, 600) });
         db.addMessage('user', clip(text, 4000), true, 'terminal');
-        const qm = text.match(/^s*(Qd+)[s:,-]*(.*)$/is);
+        const qm = text.match(/^\s*(Q\d+)\b[\s:,-]*(.*)$/is);
         for (const q of db.openQuestions()) db.answerQuestion(q.id, qm && q.qid === qm[1].toUpperCase() ? (qm[2] || text).slice(0, 500) : '(answered in terminal)');
       }
       const ctx = pendingContext();
@@ -192,6 +203,9 @@ function handleHook(body) {
       const tool = p.tool_name || '';
       const input = p.tool_input || {};
       if (isDashboardCli(tool, input)) return { action: 'none' };
+      if (!headless && runner.running()) {
+        return { action: 'deny', reason: 'A dashboard-started headless Claude run is active (one agent at a time). Do not act in parallel: end your turn now in one line. The user can type "take over" to stop it.' };
+      }
       if (S.stopReq) return { action: 'deny', reason: 'STOP pressed in the Mission Control dashboard. Do not continue the task: end your turn now with a short status and a Q<n> question.' };
       if (S.paused) {
         if (!body.polling) { addEvent({ kind: 'paused', session, tool, summary: 'Held (paused): ' + summarize(tool, redact(input)) }); pushState(); }
@@ -585,4 +599,4 @@ server.listen(cfg.port, '127.0.0.1', () => {
   console.log(`Mission Control on http://localhost:${cfg.port}  (data: ${config.DATA_DIR})`);
   if (!cfg.passwordHash) console.log(`First run: open http://localhost:${cfg.port} on this server and use setup code ${cfg.setupToken}`);
 });
-module.exports = { server, handleHook, db };
+module.exports = { server, handleHook, db, runner };

@@ -63,6 +63,7 @@ async function main() {
     return;
   }
   if (ev === 'Stop' && r.block) { out({ decision: 'block', reason: r.block }); return; }
+  if (ev === 'UserPromptSubmit' && r.blockPrompt) { out({ decision: 'block', reason: r.blockPrompt }); return; }
   if ((ev === 'PostToolUse' || ev === 'UserPromptSubmit' || ev === 'PostToolUseFailure') && r.context) {
     out({ hookSpecificOutput: { hookEventName: ev, additionalContext: r.context } });
   }

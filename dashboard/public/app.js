@@ -93,7 +93,7 @@
     $('lastAct').textContent = s.lastEventTs ? 'last action ' + ago(s.lastEventTs) : '';
     $('sessionInfo').textContent = s.session ? 'Session ' + s.session.slice(0, 8) + (s.pendingMessages ? ` · ${s.pendingMessages} message(s) not yet delivered` : '') : '';
     const r = s.runner || {};
-    $('runnerInfo').textContent = r.running ? `Headless run active since ${hhmm(r.started)} (pid ${r.pid})`
+    $('runnerInfo').textContent = r.running ? `Headless run active since ${hhmm(r.started)} (pid ${r.pid}) - the terminal session waits; type "take over" there to switch`
       : (r.last && r.last.ended ? `Last headless run ended ${ago(r.last.ended)} (exit ${r.last.code})` : (s.runnerCfg && !s.runnerCfg.claudeFound ? 'Claude Code binary not found - headless runs unavailable' : ''));
     $('btnRun').disabled = !!r.running || !(s.runnerCfg && s.runnerCfg.enabled);
     const nq = s.openQuestions.length, na = s.pendingApprovals.length;

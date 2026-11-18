@@ -128,6 +128,27 @@ test('server: setup, login, hooks, pause, gates, messages', async (t) => {
   assert.equal((await req('GET', '/api/state', null, A)).body.openQuestions.length, 0);
   assert.equal((await req('POST', '/api/messages/clear', null, A)).status, 200);
   assert.equal((await req('GET', '/api/messages', null, A)).body.length, 0);
+
+  // one agent at a time: fake an active headless run
+  const { runner } = require('../server');
+  const realRunning = runner.running, realKill = runner.kill;
+  let killed = false;
+  runner.running = () => !killed; runner.kill = () => { killed = true; return true; };
+  const held = await runHook({ hook_event_name: 'UserPromptSubmit', session_id: 's1', prompt: 'do something' });
+  assert.equal(held.decision, 'block');
+  assert.match(held.reason, /take over/);
+  const denied2 = await runHook(pre);
+  assert.equal(denied2.hookSpecificOutput.permissionDecision, 'deny');
+  const headlessOk = await new Promise((resolve) => {
+    const c = spawn(process.execPath, [path.join(__dirname, '..', 'hook.js')], { env: { ...process.env, BIDBOT_DASH_DATA: DATA, BIDBOT_DASH_RUNNER: '1' } });
+    let out = ''; c.stdout.on('data', (d) => { out += d; }); c.on('exit', () => resolve(out)); c.stdin.end(JSON.stringify(pre));
+  });
+  assert.equal(headlessOk, '');
+  const took = await runHook({ hook_event_name: 'UserPromptSubmit', session_id: 's1', prompt: 'take over' });
+  assert.ok(killed, JSON.stringify(took));
+  assert.match(took.hookSpecificOutput.additionalContext, /took over/);
+  assert.equal(await runHook(pre), null);
+  runner.running = realRunning; runner.kill = realKill;
 });
 
 test('bots: sync, commands, results, person allowlist, LinkedIn refused', () => {
