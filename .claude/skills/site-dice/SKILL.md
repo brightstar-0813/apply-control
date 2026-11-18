@@ -47,3 +47,11 @@ description: How to apply on Dice (dice.com) with BrightStar Bid Bot — Easy Ap
 
 ## Notes
 - Watch the first 2–3 Dice submits of a session to confirm they really land.
+
+## 2026-11-18 — "A sign-in form is on the page" while signed in
+Dice's apply wizard keeps a hidden (`display:none`) login modal (`input[type=password]`) in the DOM even when the
+user is signed in ("Log Out" in the header, resume shown in step 1). The bot's `detectPageBlocker` counted it →
+every Dice row paused. Fixed in bot **515b4fb** (only *visible* login controls count). If the message shows again:
+check the tab first (really signed out → user signs in, rule 6), and make sure that profile's extension was
+reloaded after 515b4fb. A stale Dice tab can also hold a `beforeunload` "Leave site?" dialog that blocks the next
+attempt (`handle_dialog accept`).
