@@ -174,3 +174,19 @@ inputs by script (native setter + input/change), unhide `#resumator-resume-value
 tick the Yes/No boxes the resume supports, EEO gender / race / veteran / disability = exact values from `profiles/<id>.md` (never "Decline to answer"; unknown → ask);
 (3) ask the user (`Q<n>`) to tick "I'm not a robot" + SUBMIT APPLICATION; (4) Start twice to move the batch on;
 (5) on "Q<n> done" verify the confirmation text in that tab, then **Mark applied**.
+
+## SuccessFactors career sites (`career8.successfactors.com`, e.g. NTT DATA `careers-inc.nttdata.com`) (2026-11-19)
+Job page **Apply now → Apply Now** → `careers?company=<id>` shows **Create an Account** with a "Please sign in" link
+(opens a Sign In dialog). Panel **Autofill** fills the dialog (and the create form behind it); click the dialog's
+**Sign In** by script (the snapshot uid goes stale). "Invalid email address or password" = older account →
+**Forgot your password?** → Password Help → Outlook "NTT DATA Password Reset" (search the company; the reset `<a>` is in
+the reading pane) → open it in the apply tab → panel Autofill fills both password boxes → Submit → "password has been
+updated successfully" → back to the job → Apply Now → sign in.
+The application is **one page**, prefilled from the candidate profile — including the **old resume / cover letter**
+from the last application: replace them (Resume "Edit document", Cover Letter "Delete document" → OK → "Attach a Cover
+Letter"; each opens "Upload from Device" = `upload_file` on that button). Yes/No + source dropdowns: click the
+combobox's sibling `button`, then mouse events on the `[role=option]` text. Date field takes `fill` "MM/DD/YYYY".
+Gender may come back empty → exact value (never "I Don't Wish To Answer"). NTT DATA asks **travel willingness + %**
+(Avash: Yes, 25 — `profiles/avash-chapagain.md`). **Apply** → the next page is blank (only "Back to Job Listings /
+View Profile"); confirm in **View Profile → Jobs Applied (n)** (row "Under Review", today's date) — the thank-you
+mail can lag. The panel shows "Auto-submit" on this host; its run stopped at Submit ("Reached Submit (apply)").
