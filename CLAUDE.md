@@ -78,6 +78,10 @@ Person data comes from the bot (built-in `profiles.js` or the custom copy in tha
    Autofill for credentials, Outlook tab for links / codes) without asking. CAPTCHA, or anything
    unclear or impossible → alert on the dashboard at once (`Q<n>` + screenshot), leave the tab open,
    continue with other rows. Never fill made-up profile data (name, gender, …) to get past a form.
+   AI-written answers (bot's API Custom Q&A, or Claude's own wording) are fine for open questions
+   (why this role, describe your experience, …) as long as they rest on the real profile / resume;
+   the profile's backbone facts (identity, contact, work history, education, certifications,
+   authorization, clearances, years of X, EEO) are never invented.
 7. **Credentials never go in files** — not in skills, profiles, runs, or commits. Logins live
    in the Chrome profile. If a password is needed mid-run, ask; use it once; don't record it.
 8. **Pace it.** Respect the bot's cooldowns; stop on rate-limit signals. Default cap is in
