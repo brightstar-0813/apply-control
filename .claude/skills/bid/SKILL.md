@@ -1,6 +1,6 @@
 ---
 name: bid
-description: One-command start of a BrightStar Bid Bot apply session for a person and a source filter — `/bid <person> <source> [cap]` (e.g. `/bid avash dice`, `/bid lewis all 10`). The `/<person>-<source>-bid` shortcuts (avash-dice-bid, lewis-all-bid, …) all land here. Runs apply-run with that person and filter pre-set.
+description: One-command start of a BrightStar Bid Bot apply session for a person and a source filter — `/bid <person> <source> [cap]` (e.g. `/bid avash dice`, `/bid lewis all 10`, `/bid both all` = Avash and Lewis in parallel). The `/<person>-<source>-bid` shortcuts (avash-dice-bid, lewis-all-bid, …) all land here. Runs apply-run with that person and filter pre-set.
 ---
 
 # bid
@@ -11,6 +11,7 @@ Arguments: `<person> <source> [cap] [extra notes]`. Example: `avash dice 10`.
 |------------|-------------|----------------|
 | `avash` (default) | avash-chapagain | `Profile 2` |
 | `lewis` | dmario-lewis | `Profile 1` |
+| `both` | both of the above, in parallel | apply-run §3c (one Claude alternating; preflight + queue go per profile) |
 
 Any other person → stop and say they aren't enabled (CLAUDE.md rule 1).
 

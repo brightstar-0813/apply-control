@@ -16,6 +16,7 @@ learned so the next run goes further.
 | Know which popup control does what / read bot state | `bot-operate` |
 | Run an apply session end to end | `apply-run` |
 | One-command start: `/bid <person> <source> [cap]` or `/<person>-<source>-bid [cap]` (avash/lewis × dice, greenhouse, workday, builtin, himalayas, jobright, other, all) | `bid` |
+| Avash + Lewis in parallel (`/bid both <source>`): one Claude alternating between both bots | `apply-run` §3c |
 | Something blocked an application | `blocker-fix` |
 | Status, questions, user messages, Pause/Stop/approvals via the web dashboard (primary channel) | `mission-control` |
 | Ask the user / take their answers via the Slack channel (mirror + fallback) | `slack-chat` |

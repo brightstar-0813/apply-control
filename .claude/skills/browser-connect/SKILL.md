@@ -64,6 +64,16 @@ debugging?" prompt again; ask the user to click Allow at the start of the run.
 5. Log page id, `sw-N`, person id in the run log.
 6. Work on tabs the bot opens itself (AI tab, apply tabs) — they're in the bound profile.
 
+### Two profiles bound at once (parallel mode, apply-run §3c)
+
+- Open both bot windows with `chrome.exe --profile-directory="Profile N" "chrome-extension://…/popup.html?ctx=window"`
+  (never `new_page`: it lands in the last-focused profile). Verify `#profileSelect` on each.
+- Two bot pages and two bot `sw-N` are expected; match each worker to its profile by reading
+  `active_person_id` / the queue from it, or by start time after reloading one profile at a time.
+- A tab belongs to the profile whose bot page lists it in `chrome.tabs.query({})` (read-only).
+  Use that before acting on any apply / Outlook / ChatGPT tab; both profiles can have the same site open.
+- Open hand-work tabs from that profile's own bot page (`chrome.windows.create`), not `new_page`.
+
 ## Reload after bot code changes
 
 - Each Chrome profile runs its **own instance** of the extension. Popup/content files are read
