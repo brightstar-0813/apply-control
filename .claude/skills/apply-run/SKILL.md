@@ -57,7 +57,11 @@ the Stop hooks relay to both. Terminal messages still work too.
      2. Finish the form (aggregators: click through to the employer ATS); answers from
         profile / Q&A bank / user — never invented.
      3. Submit (profile allows) → confirm the thank-you / "application received" page.
-     4. Row **Mark applied ✓** → `#batchStart` to resume.
+     4. Row **Mark applied ✓**.
+     5. **Close the row's tabs** (rule 12): the apply tab plus any listing / ATS / verification
+        tabs it opened (`close_page`). Never the bot window, ChatGPT, Outlook or dashboard tabs.
+        Same after a skip. Only a tab waiting on the user (CAPTCHA, open `Q<n>`) stays open.
+     6. `#batchStart` to resume.
    - **Can't finish** (CAPTCHA, login, MFA, closed job) → `blocker-fix`. To move on without
      applying: `#batchStart` again (second attempt exhausts the row) or `#batchSkip`.
    - **External Indeed**: bot fills, never submits; finish on the employer site if allowed, then Mark applied.
@@ -92,7 +96,8 @@ when the user says "both" / "together".
 4. **Loop:** poll Avash, poll Lewis (bot page `#status` or SW read), 30–60 s per round.
    - Both running → status line only, no other tools.
    - One paused → finish that row (site skill, answers from **that person's** profile file),
-     Mark applied, `#batchStart`, then poll the other before taking the next row.
+     Mark applied, close that row's tabs (rule 12), `#batchStart`, then poll the other before
+     taking the next row.
    - Both paused → oldest pause first. A row waiting on a user answer or a CAPTCHA → ask, leave the
      tab open, and move to the other profile's row instead of waiting.
 5. **Never mix persons:** answers, resume / cover letter folder, Outlook tab, ATS account and the

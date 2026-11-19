@@ -102,6 +102,11 @@ Person data comes from the bot (built-in `profiles.js` or the custom copy in tha
     filter, never open or fill LinkedIn job / Easy Apply pages, never Mark applied a LinkedIn row.
     At queue review, offer to remove LinkedIn rows before Start. If any apply flow lands on
     `linkedin.com`, stop that row and skip it. The bot itself never batch-applies LinkedIn rows.
+12. **Close finished apply tabs** (user, 2026-11-19). Once a row is done — confirmation seen and
+    Mark applied clicked, or the row skipped / closed job / already applied — close its apply tab
+    and every tab that row opened (aggregator listing, employer ATS, sign-up / verification pages)
+    with `close_page`. Keep open: the bot window, the ChatGPT tab, the Outlook tab, the dashboard,
+    and any tab still waiting on the user (CAPTCHA, open `Q<n>`) — close those once resolved.
 
 ## What applies to which profile
 
