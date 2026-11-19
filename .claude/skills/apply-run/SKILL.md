@@ -60,7 +60,9 @@ the Stop hooks relay to both. Terminal messages still work too.
      4. Row **Mark applied ✓**.
      5. **Close the row's tabs** (rule 12): the apply tab plus any listing / ATS / verification
         tabs it opened (`close_page`). Never the bot window, ChatGPT, Outlook or dashboard tabs.
-        Same after a skip. Only a tab waiting on the user (CAPTCHA, open `Q<n>`) stays open.
+        Same after a skip (closed job, already applied, misfit). Stays open: a tab waiting on the
+        user (CAPTCHA, open `Q<n>`) and any **error / unfinished row's tab** — leave it as it is
+        for the user to review or continue, and note it in the run log + dashboard.
      6. `#batchStart` to resume.
    - **Can't finish** (CAPTCHA, login, MFA, closed job) → `blocker-fix`. To move on without
      applying: `#batchStart` again (second attempt exhausts the row) or `#batchSkip`.

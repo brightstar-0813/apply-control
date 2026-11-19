@@ -107,6 +107,9 @@ Person data comes from the bot (built-in `profiles.js` or the custom copy in tha
     and every tab that row opened (aggregator listing, employer ATS, sign-up / verification pages)
     with `close_page`. Keep open: the bot window, the ChatGPT tab, the Outlook tab, the dashboard,
     and any tab still waiting on the user (CAPTCHA, open `Q<n>`) — close those once resolved.
+    **Error tabs stay open** (user, 2026-11-19): a row that ended in an error or could not be
+    finished keeps its tab open, as it is, so the user can review or continue it; note the tab
+    (row, company, what blocked it) in the run log and on the dashboard.
 
 ## What applies to which profile
 
