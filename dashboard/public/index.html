@@ -40,6 +40,7 @@
       <div class="top-left">
         <span id="statePill" class="pill">…</span>
         <span id="conn" class="conn" title="Live connection"></span>
+        <button id="needBtn" class="needbtn" hidden></button>
       </div>
       <div class="top-right">
         <button id="btnPause" class="btn small">Pause</button>
@@ -48,35 +49,48 @@
     </header>
 
     <section id="tab-live" class="tab">
-      <div class="card">
-        <div class="row-between">
-          <h2>Now</h2>
-          <span id="lastAct" class="muted small"></span>
-        </div>
-        <p id="statusText" class="status-text muted">No status yet.</p>
-        <p id="sessionInfo" class="muted small"></p>
-        <p id="runnerInfo" class="muted small"></p>
-      </div>
+      <section id="needs" class="needs" hidden aria-label="Needs you">
+        <div class="needs-head"><h2>Needs you</h2><span id="needsCount" class="count"></span></div>
+        <div id="needsList"></div>
+      </section>
+      <p id="allClear" class="allclear" hidden>Nothing needs you right now.</p>
 
-      <div class="card">
-        <h2>Start / wake the agent</h2>
-        <div class="chips" id="quickRuns">
-          <button class="chip" data-p="/bid avash dice">Avash · Dice</button>
-          <button class="chip" data-p="/bid avash all">Avash · All</button>
-          <button class="chip" data-p="/bid lewis dice">Lewis · Dice</button>
-          <button class="chip" data-p="/bid lewis all">Lewis · All</button>
-          <button class="chip" data-p="Continue the current session where you left off.">Continue</button>
-        </div>
-        <textarea id="runPrompt" rows="2" placeholder="Prompt, e.g. /bid avash greenhouse 10"></textarea>
-        <label class="check"><input id="runResume" type="checkbox" checked> Continue the last session (keeps its context)</label>
-        <button id="btnRun" class="btn primary">Start headless run</button>
-        <p id="runErr" class="err"></p>
-      </div>
+      <div id="tiles" class="tiles"></div>
+      <div id="breakdown" class="grid2"></div>
 
-      <div class="card">
-        <div class="row-between"><h2>What the agent sees</h2><span id="shotTime" class="muted small"></span></div>
-        <a id="shotLink" target="_blank" rel="noopener"><img id="shot" alt="Latest screenshot taken by the agent" hidden></a>
-        <p id="noShot" class="muted small">No screenshot yet. One appears whenever the agent takes a screenshot.</p>
+      <div class="grid2">
+        <div>
+          <div class="card">
+            <div class="row-between">
+              <h2>Now</h2>
+              <span id="lastAct" class="muted small"></span>
+            </div>
+            <p id="statusText" class="status-text muted">No status yet.</p>
+            <p id="sessionInfo" class="muted small"></p>
+            <p id="runnerInfo" class="muted small"></p>
+          </div>
+
+          <div class="card">
+            <h2>Start / wake the agent</h2>
+            <div class="chips" id="quickRuns">
+              <button class="chip" data-p="/bid avash dice">Avash · Dice</button>
+              <button class="chip" data-p="/bid avash all">Avash · All</button>
+              <button class="chip" data-p="/bid lewis dice">Lewis · Dice</button>
+              <button class="chip" data-p="/bid lewis all">Lewis · All</button>
+              <button class="chip" data-p="Continue the current session where you left off.">Continue</button>
+            </div>
+            <textarea id="runPrompt" rows="2" placeholder="Prompt, e.g. /bid avash greenhouse 10"></textarea>
+            <label class="check"><input id="runResume" type="checkbox" checked> Continue the last session (keeps its context)</label>
+            <button id="btnRun" class="btn primary">Start headless run</button>
+            <p id="runErr" class="err"></p>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="row-between"><h2>What the agent sees</h2><span id="shotTime" class="muted small"></span></div>
+          <a id="shotLink" target="_blank" rel="noopener"><img id="shot" alt="Latest screenshot taken by the agent" hidden></a>
+          <p id="noShot" class="muted small">No screenshot yet. One appears whenever the agent takes a screenshot.</p>
+        </div>
       </div>
 
       <div class="card">
@@ -160,7 +174,7 @@
     </section>
 
     <nav class="tabs">
-      <button data-tab="live" class="on">Live</button>
+      <button data-tab="live" class="on">Live <b id="badgeLive" class="badge" hidden></b></button>
       <button data-tab="bots">Bots</button>
       <button data-tab="inbox">Inbox <b id="badgeInbox" class="badge" hidden></b></button>
       <button data-tab="approve">Approve <b id="badgeAppr" class="badge" hidden></b></button>

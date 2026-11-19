@@ -55,7 +55,7 @@
 
   function startApp() {
     $('auth').hidden = true; $('app').hidden = false;
-    loadFeed(); loadThread(); connect();
+    loadFeed(); loadThread(); loadBots().catch(() => {}); connect();
     if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
   }
 
@@ -67,8 +67,8 @@
     es.addEventListener('state', (e) => { state = JSON.parse(e.data); renderState(); });
     es.addEventListener('event', (e) => { const ev = JSON.parse(e.data); addEvents([ev], true); if (ev.kind === 'say' || ev.kind === 'user' || ev.kind === 'stop') loadThread(); });
     es.addEventListener('shot', () => renderShot(true));
-    es.addEventListener('bots', (e) => { botsData = JSON.parse(e.data).bots || []; renderBots(); });
-    es.addEventListener('question', () => notify('New question from the agent', 'Open the Inbox to answer.'));
+    es.addEventListener('bots', (e) => { botsData = JSON.parse(e.data).bots || []; renderBots(); if (state) { renderQuestions(); renderOverview(); } });
+    es.addEventListener('question', () => notify('New question from the agent', 'Open the dashboard to answer.'));
     es.addEventListener('approval', () => notify('Approval needed', 'The agent is waiting for your OK.'));
   }
 
@@ -99,7 +99,7 @@
     const nq = s.openQuestions.length, na = s.pendingApprovals.length;
     $('badgeInbox').hidden = !nq; $('badgeInbox').textContent = nq;
     $('badgeAppr').hidden = !na; $('badgeAppr').textContent = na;
-    renderQuestions(); renderApprovals();
+    renderQuestions(); renderApprovals(); renderOverview();
     if (s.shotTs && s.shotTs !== renderShot.last) renderShot();
     document.title = (nq + na ? `(${nq + na}) ` : '') + 'Mission Control';
   }
@@ -148,29 +148,155 @@
       '<li class="muted small">No messages.</li>';
     if (!$('tab-inbox').hidden) $('thread').lastElementChild?.scrollIntoView({ block: 'end' });
   }
-  function renderQuestions() {
-    const n = state.openQuestions.length;
-    $('qBar').hidden = n < 2; $('qCount').textContent = n + ' open questions';
-    $('questions').innerHTML = state.openQuestions.map((q) => `
-      <div class="card q" data-id="${q.id}">
-        <div class="row-between"><h2>${esc(q.qid || 'Question')}</h2><span class="muted small">${ago(q.ts)}</span></div>
-        <pre>${esc(q.text)}</pre>
-        <div class="opts">${q.options.map((o) => `<button class="btn small" data-ans="${esc(o)}">${esc(o)}</button>`).join('')}</div>
-        <div class="free"><input placeholder="Other answer…" aria-label="Other answer"><button class="btn small primary" data-free="1">Send</button></div>
-        <button class="btn ghost small" data-dismiss="1">Dismiss</button>
-      </div>`).join('');
+  // Which job a question is about: "Q3 (Avash #24): ..." -> bot + queue row, when the bot shares it.
+  function qContext(q) {
+    const m = String(q.text).match(/^\s*Q\d+\s*(?:\(([^)]*)\))?\s*[:\-–]\s*/);
+    const ctx = (m && m[1]) || '';
+    const body = (m ? q.text.slice(m[0].length) : q.text).trim();
+    const rm = ctx.match(/#\s*(\d+)/);
+    const rowNo = rm ? Number(rm[1]) : null;
+    let bot = botsData.find((b) => { const w = String(b.label || b.person || '').split(/[\s-]+/)[0].toLowerCase(); return w && ctx.toLowerCase().includes(w); });
+    if (!bot && botsData.length === 1) bot = botsData[0];
+    const row = bot && rowNo != null ? ((bot.state || {}).rows || []).find((r) => Number(r.row) === rowNo) : null;
+    const nl = body.indexOf('\n');
+    return { ctx, rowNo, row, head: (nl < 0 ? body : body.slice(0, nl)).trim(), rest: nl < 0 ? '' : body.slice(nl + 1).trim() };
   }
-  $('questions').addEventListener('click', async (e) => {
-    const card = e.target.closest('.q'); if (!card) return;
+  const tag = (t) => (t ? `<span class="tag">${esc(t)}</span>` : '');
+  function questionCard(q) {
+    const c = qContext(q); const r = c.row;
+    const title = r ? `<b>${esc(r.title || r.company || 'Row ' + r.row)}</b>${r.title && r.company ? ` <span class="muted">${esc(r.company)}</span>` : ''}`
+      : `<b>${esc(q.qid || 'Question')}</b>${c.ctx ? ` <span class="muted">${esc(c.ctx)}</span>` : ''}`;
+    const tags = (r ? tag(q.qid) + tag('row ' + r.row) + (boardOf(r.source) !== 'Direct / other' ? tag(boardOf(r.source)) : '') + (atsOf(r.source) !== 'Unknown' ? tag(atsOf(r.source)) : '') : '') + tag(hhmm(q.ts));
+    return `
+      <article class="need q" data-id="${q.id}">
+        <header class="need-top"><div class="need-title">${title}</div><div class="tags">${tags}</div></header>
+        <div class="need-body">
+          <p class="need-q">${esc(c.head)}</p>
+          ${c.rest ? `<p class="need-more">${esc(c.rest)}</p>` : ''}
+          ${q.options.length ? `<div class="opts">${q.options.map((o) => `<button class="btn small" data-ans="${esc(o)}">${esc(o)}</button>`).join('')}</div>` : ''}
+          <div class="answer"><textarea rows="2" placeholder="Type your answer here" aria-label="Your answer to ${esc(q.qid || 'the question')}"></textarea>
+            <button class="btn primary" data-free="1">Send answer and continue</button></div>
+        </div>
+        <footer class="need-foot">
+          ${c.rowNo != null ? '<button class="btn small" data-skip="1">Skip this job</button>' : ''}
+          ${r && r.link ? `<a class="btn ghost small" href="${esc(r.link)}" target="_blank" rel="noopener noreferrer">Open job</a>` : ''}
+          <button class="btn ghost small" data-dismiss="1">Dismiss</button>
+        </footer>
+      </article>`;
+  }
+  function approvalCard(a) {
+    return `
+      <article class="need appr" data-id="${a.id}">
+        <header class="need-top"><div class="need-title"><b>Approval needed</b> <span class="muted">${esc(a.gate)}</span></div><div class="tags">${tag(hhmm(a.ts))}</div></header>
+        <div class="need-body">
+          <p class="need-q">${esc(a.summary)}</p>
+          <details><summary class="muted small">Details</summary><pre>${esc(a.detail)}</pre></details>
+          <div class="acts"><button class="btn good" data-d="approve">Approve</button><button class="btn danger" data-d="deny">Deny</button></div>
+        </div>
+      </article>`;
+  }
+  // Re-render only when the content changes, and keep what the user is typing.
+  function setCards(el, html) {
+    if (el._html === html) return;
+    const drafts = {}; let focus = null;
+    el.querySelectorAll('.q').forEach((c) => {
+      const t = c.querySelector('textarea'); if (!t) return;
+      if (t.value) drafts[c.dataset.id] = t.value;
+      if (t === document.activeElement) focus = [c.dataset.id, t.selectionStart, t.selectionEnd];
+    });
+    el.innerHTML = html; el._html = html;
+    el.querySelectorAll('.q').forEach((c) => {
+      const t = c.querySelector('textarea'); if (!t) return;
+      if (drafts[c.dataset.id]) t.value = drafts[c.dataset.id];
+      if (focus && focus[0] === c.dataset.id) { t.focus(); t.setSelectionRange(focus[1], focus[2]); }
+    });
+  }
+  function renderQuestions() {
+    const qs = state.openQuestions, n = qs.length;
+    $('qBar').hidden = n < 2; $('qCount').textContent = n + ' open questions';
+    setCards($('questions'), qs.map(questionCard).join(''));
+    renderNeeds();
+  }
+  function renderNeeds() {
+    if (!state) return;
+    const qs = state.openQuestions, as = state.pendingApprovals, n = qs.length + as.length;
+    $('needs').hidden = !n; $('allClear').hidden = !!n;
+    $('needsCount').textContent = n;
+    setCards($('needsList'), as.map(approvalCard).join('') + qs.map(questionCard).join(''));
+    $('needBtn').hidden = !n; $('needBtn').textContent = n === 1 ? '1 needs you' : n + ' need you';
+    $('badgeLive').hidden = !n; $('badgeLive').textContent = n;
+  }
+  async function onCardClick(e) {
+    const t = e.target.closest('button'); if (!t) return;
+    const card = t.closest('.need'); if (!card) return;
     const id = card.dataset.id;
+    const answer = (a) => api(`/api/questions/${id}/answer`, { method: 'POST', body: { answer: a } });
     try {
-      if (e.target.dataset.ans) await api(`/api/questions/${id}/answer`, { method: 'POST', body: { answer: e.target.dataset.ans } });
-      else if (e.target.dataset.free) { const v = card.querySelector('input').value.trim(); if (!v) return; await api(`/api/questions/${id}/answer`, { method: 'POST', body: { answer: v } }); }
-      else if (e.target.dataset.dismiss) await api(`/api/questions/${id}/dismiss`, { method: 'POST' });
+      if (t.dataset.d) { t.disabled = true; await api('/api/approvals/' + id, { method: 'POST', body: { decision: t.dataset.d } }); loadApprHist(); return; }
+      if (t.dataset.ans) { t.disabled = true; await answer(t.dataset.ans); }
+      else if (t.dataset.free) {
+        const ta = card.querySelector('textarea'); const v = ta.value.trim();
+        if (!v) { ta.focus(); return; }
+        t.disabled = true; t.textContent = 'Sending…'; await answer(v); ta.value = '';
+      }
+      else if (t.dataset.skip) { if (!confirm('Skip this job? The agent drops this row and continues with the next one.')) return; t.disabled = true; await answer('skip this job'); }
+      else if (t.dataset.dismiss) { if (!confirm('Dismiss this question without answering?')) return; await api(`/api/questions/${id}/dismiss`, { method: 'POST' }); }
       else return;
       loadThread();
-    } catch (err) { alert(err.message); }
+    } catch (err) { t.disabled = false; if (t.dataset.free) t.textContent = 'Send answer and continue'; alert(err.message); }
+  }
+  function onCardKey(e) {
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey) && e.target.tagName === 'TEXTAREA') e.target.closest('.need')?.querySelector('[data-free]')?.click();
+  }
+  for (const id of ['needsList', 'questions', 'approvals']) { $(id).addEventListener('click', onCardClick); $(id).addEventListener('keydown', onCardKey); }
+  $('needBtn').addEventListener('click', () => {
+    document.querySelector('.tabs button[data-tab="live"]').click();
+    $('needs').scrollIntoView({ block: 'start' });
+    $('needsList').querySelector('textarea, .acts .btn')?.focus({ preventScroll: true });
   });
+
+  // ---------------- overview (tiles + breakdown) ----------------
+  const BOARDS = [[/dice\.com$/, 'Dice'], [/indeed\.com$/, 'Indeed'], [/builtin/, 'Built In'], [/himalayas\.app$/, 'Himalayas'],
+    [/jobright\.ai$/, 'JobRight'], [/jobgether\.com$/, 'Jobgether'], [/linkedin\.com$/, 'LinkedIn']];
+  const ATS = [[/greenhouse\.io$/, 'Greenhouse'], [/workdayjobs\.com$/, 'Workday'], [/lever\.co$/, 'Lever'], [/ashbyhq\.com$/, 'Ashby'],
+    [/icims\.com$/, 'iCIMS'], [/paylocity\.com$/, 'Paylocity'], [/smartrecruiters\.com$/, 'SmartRecruiters'], [/bamboohr\.com$/, 'BambooHR'],
+    [/successfactors\.(com|eu)$/, 'SuccessFactors'], [/taleo\.net$/, 'Taleo'], [/jobvite\.com$/, 'Jobvite'], [/dice\.com$/, 'Dice Easy Apply'], [/indeed\.com$/, 'Indeed Apply']];
+  const pick = (list, host, d) => { const h = String(host || '').toLowerCase(); const x = list.find(([re]) => re.test(h)); return x ? x[1] : d; };
+  const boardOf = (host) => pick(BOARDS, host, 'Direct / other');
+  const atsOf = (host) => pick(ATS, host, 'Unknown');
+  const bucket = (st) => (st === 'applied' ? 'sub' : st === 'error' || st === 'failed' ? 'err' : st === 'skipped' ? 'skip' : 'todo');
+  const num = (v, cls) => `<td class="n${v ? ' ' + cls : ' zero'}">${v}</td>`;
+  function table(title, rows, keyOf) {
+    const g = new Map();
+    for (const r of rows) { const k = keyOf(r.source); const o = g.get(k) || { sub: 0, err: 0, todo: 0, skip: 0, all: 0 }; o[bucket(r.status)] += 1; o.all += 1; g.set(k, o); }
+    const last = (k) => (k === 'Unknown' || k === 'Direct / other' ? 1 : 0);
+    const body = [...g.entries()].sort((x, y) => last(x[0]) - last(y[0]) || y[1].all - x[1].all)
+      .map(([k, o]) => `<tr><th scope="row">${esc(k)}</th>${num(o.sub, 'ok')}${num(o.err, 'bad')}${num(o.todo, '')}${num(o.skip, '')}${num(o.all, '')}</tr>`).join('');
+    return `<div class="card"><div class="tbl"><table class="stats"><thead><tr><th scope="col">${title}</th>` +
+      '<th scope="col" class="n">Submitted</th><th scope="col" class="n">Errors</th><th scope="col" class="n">To do</th><th scope="col" class="n">Skipped</th><th scope="col" class="n">All</th>' +
+      `</tr></thead><tbody>${body}</tbody></table></div></div>`;
+  }
+  function renderOverview() {
+    if (!state) return;
+    const need = state.openQuestions.length + state.pendingApprovals.length;
+    const t = { applied: 0, todo: 0, queue: 0, error: 0 }; const per = { applied: [], todo: [], queue: [] };
+    let rows = [], shown = 0, total = 0;
+    for (const b of botsData) {
+      const s = b.state || {}; const c = s.counters || {}; const name = String(b.label || b.person || 'Bot').split(' ')[0];
+      const todo = (c.pending || 0) + (c.running || 0);
+      t.applied += c.applied || 0; t.todo += todo; t.queue += c.queue || 0; t.error += c.error || 0;
+      per.applied.push(`${name} ${c.applied || 0}`); per.todo.push(`${name} ${todo}`); per.queue.push(`${name} ${c.queue || 0}`);
+      rows = rows.concat(s.rows || []); shown += (s.rows || []).length; total += s.rowsTotal || (s.rows || []).length;
+    }
+    const has = botsData.length > 0; const sub = (k) => (botsData.length > 1 ? per[k].join(' · ') : '');
+    const tile = (cls, label, v, note) => `<div class="tile ${cls}"><span class="tl">${label}</span><b>${v}</b><span class="tn">${esc(note || '')}</span></div>`;
+    const v = (x) => (has ? x : '–');
+    $('tiles').innerHTML = tile('ok', 'Submitted', v(t.applied), sub('applied')) +
+      tile(need ? 'warn' : '', 'Needs you', need, t.error ? `${t.error} row${t.error === 1 ? '' : 's'} stopped with errors` : '') +
+      tile('', 'To do', v(t.todo), sub('todo')) + tile('info', 'Tracked', v(t.queue), has ? sub('queue') : 'Open the bot window to see queue numbers');
+    $('breakdown').innerHTML = rows.length ? table('Job board', rows, boardOf) + table('Application system', rows, atsOf) +
+      (shown < total ? `<p class="muted small span2">Tables cover the ${shown} of ${total} rows the bot shares (active rows first); the tiles count every row.</p>` : '') : '';
+  }
   $('thread').addEventListener('click', async (e) => {
     const id = e.target.dataset.del; if (!id) return;
     const li = e.target.closest('li');
@@ -194,20 +320,8 @@
 
   // ---------------- approvals ----------------
   function renderApprovals() {
-    const list = state.pendingApprovals;
-    $('approvals').innerHTML = list.length ? list.map((a) => `
-      <div class="card appr" data-id="${a.id}">
-        <div class="row-between"><h2>${esc(a.gate)}</h2><span class="muted small">${ago(a.ts)}</span></div>
-        <p><b>${esc(a.summary)}</b></p>
-        <details><summary class="muted small">Details</summary><pre>${esc(a.detail)}</pre></details>
-        <div class="acts"><button class="btn good" data-d="approve">Approve</button><button class="btn danger" data-d="deny">Deny</button></div>
-      </div>`).join('') : '<div class="card"><p class="muted">Nothing waiting for approval.</p></div>';
+    setCards($('approvals'), state.pendingApprovals.map(approvalCard).join('') || '<div class="card"><p class="muted">Nothing waiting for approval.</p></div>');
   }
-  $('approvals').addEventListener('click', async (e) => {
-    const d = e.target.dataset.d; if (!d) return;
-    const id = e.target.closest('.appr').dataset.id;
-    try { await api('/api/approvals/' + id, { method: 'POST', body: { decision: d } }); loadApprHist(); } catch (err) { alert(err.message); }
-  });
   async function loadApprHist() {
     const list = await api('/api/approvals');
     $('apprHist').innerHTML = list.filter((a) => a.status !== 'pending').map((a) =>
@@ -235,7 +349,7 @@
 
   // ---------------- bots (bot bridge) ----------------
   let botsData = [];
-  async function loadBots() { const r = await api('/api/bots'); botsData = r.bots; renderBots(); }
+  async function loadBots() { const r = await api('/api/bots'); botsData = r.bots; renderBots(); if (state) { renderQuestions(); renderOverview(); } }
   const CONFIRM = {
     start: 'Start the batch on this bot?', stop: 'Stop the batch?', skip: 'Skip the row the bot is working on?',
     rowApply: 'Open and apply this row now?', rowMarkApplied: 'Mark this row applied? Only do this after you saw a real confirmation page.',

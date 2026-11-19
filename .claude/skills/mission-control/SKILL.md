@@ -22,7 +22,11 @@ The user's primary channel (user decision 2026-11-17). Slack stays as a mirror a
 - **Approval gates** (Settings → gates, default: `git push`): the call waits for Approve / Deny.
   Denied → don't retry the same action; ask what to do instead.
 - Your final message's `Q<n>: …` (with `Reply "Q<n> option"` options) becomes a card with
-  one-tap answers.
+  one-tap answers in the **Needs you** panel at the top of the Live tab (and in Inbox).
+  Write it as `Q<n> (<Person> #<row>): <the question on the first line>` and put context / a
+  draft answer on the following lines: the first line is shown bold, the rest muted, and
+  `(<Person> #<row>)` lets the card show the job title, company, chips and a **Skip this job**
+  button (arrives as `Q<n> skip this job` → skip that row and go on).
 - **Headless runs** (phase 4): when the user writes while you're idle, the dashboard resumes the
   last session with `claude -p --resume` and the messages as the prompt. Nobody is at the
   terminal then: ask questions in the final message, never wait for terminal input.

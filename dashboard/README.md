@@ -10,6 +10,7 @@ packages, Tailscale Funnel for HTTPS access, and headless runs use this PC's Cla
 |---|---|
 | **Live** | Agent state (working / waiting / paused / idle), its status line, the latest screenshot it took, every action as it happens, and Start/wake buttons for a headless run (`/bid avash dice`, …) |
 | **Bots** | A card for each open bot window (Avash, Lewis): counters, status, queue (rows you can act on first, 50 shown), and the bot's controls: Load from sheet, Start/Pause/Skip/Stop, source filter (never LinkedIn), Batch mode, auto submit, autofill, person, and row Apply / Mark applied / Remove. They run through `dashboard-bridge.js` in the bot window, which clicks the bot's own buttons. The bridge only accepts requests made locally on the server, never through the public link |
+| **Live** (top) | **Needs you**: open `Q<n>` questions and pending approvals with an answer box, *Send answer and continue*, *Skip this job*; then stat tiles (submitted / needs you / to do / tracked) and job-board / application-system tables from the connected bots |
 | **Inbox** | The agent's `Q<n>` questions as cards with one-tap answers, plus a chat. Messages reach the agent after its next action, or wake it if it's idle |
 | **Approve** | Actions held by an approval gate (default: `git push`). Approve or Deny |
 | **Runs** | `runs/*.md` session logs |
