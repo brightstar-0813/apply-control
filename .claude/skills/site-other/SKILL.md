@@ -63,6 +63,9 @@ description: Host → site-skill routing table for BrightStar Bid Bot apply tabs
   (no POST, no error), so it's human-only. Ask the user to click Apply. (Offprem Technology, 2026-11-15)
 - **Jobvite** (`jobs.jobvite.com/<co>/job/<id>/apply`): short form (Council Advisors #76, 2026-11-16): **Add Resume** opens an "Attachment Options" dialog → `upload_file` on its ` File` button; same for **Add Cover Letter**; First / Last / Email; **Send Application** → `…/applyConfirmation` "Application Sent!". No account, no CAPTCHA seen. The in-page panel shows *Allow auto submit* checked here — fill by hand rather than panel Autofill if you need to review first.
 - **CareerPlug** (`<co>.careerplug.com/jobs/<id>/apps/new`): one page, no account. Name / email / phone, SMS opt-in radio (rule 5), Address / City / States combobox (fill "Virginia") / ZIP, Resume + Cover Letter "Upload File" buttons (upload_file works), Recent Job Title / Employer (from the master resume, Avash = Senior Salesforce Specialist / Attain Partners). **Submit Application** opens a reCAPTCHA v2 image challenge → user (rule 6). Done = "Thank You, <name>! We have received your information…" at `…/apps/<n>` (Ensisinfo #74, 2026-11-16).
+  2026-11-19 (Lewis): the tenant host is `ensisinfo-inc.careerplug.com` (`ensisinfo.` lands on CareerPlug's own sign-in). The board has
+  several pages: `fetch('/jobs?page=n')` from the tab and match the title to get `/jobs/<id>`. Submit went straight to the thank-you
+  page, **no reCAPTCHA challenge** that time, so always try Submit before asking the user.
 - **Dayforce** (`jobs.dayforcehcm.com/<co>/candidateportal/jobs/<id>/apply`): use **Apply without an Account**. The SMS dialog
   defaults to "do not consent", so just Save. Reject cookies; if the Cookie Preference Center opens, Save it.
   The flow is Candidate Info → Questionnaire (1..n pages) → Submit (acknowledgement checkbox + Submit). It has an
@@ -154,6 +157,14 @@ description: Host → site-skill routing table for BrightStar Bid Bot apply tabs
   questions): click, `type_text` the option, then click the `[role=option]` inside the input's
   `aria-controls` list. **Start date: "Today" is rejected** ("cannot be in the past", UKG's clock runs a day
   ahead) → pick tomorrow. Two "I Accept" consents. Done = `/apply/success` "Thank you for your application".
+
+- **SkipTheDrive** (`skipthedrive.com/job/<slug>`): aggregator, no adapter. The bot pauses with "Reached Submit (Search)" (it reads
+  the site search button as Submit). The employer link is the **"Apply for this position"** anchor: open that host and continue with
+  its skill. EBizCharge (→ `ats.rippling.com/ebizcharge`) uses one long Rippling form for every role: emergency contact, supervisor
+  contact, reason for leaving, 3 professional references → not in any profile → Mark skipped "needs references + emergency contact"
+  (user, 2026-11-15, same answer applied to Lewis 2026-11-19).
+- **arbeitnow** (`arbeitnow.com`, `arbeitnow.co.uk`): European board behind a Cloudflare "Just a moment…" page (bot: "No application
+  form found"). The URL slug carries the city (`…-london-220230`); UK / German employers → Mark skipped "non-US (<city>)". (2026-11-19)
 
 ## When a host repeats
 
