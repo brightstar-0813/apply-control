@@ -73,6 +73,11 @@ Person data comes from the bot (built-in `profiles.js` or the custom copy in tha
    **Mailbox (user, 2026-11-16, terminal, standing):** Claude may read the person's own **Outlook tab**
    (Avash, Lewis) to find and click verification links / codes, and to check "already applied?" for
    a company before an account wall. Never send, reply, delete, or move mail. See `slack-chat`.
+   **Only CAPTCHA goes to the user (user, 2026-11-19):** login walls, sign-ups, email verification
+   links / codes and password resets via the Outlook link → Claude handles them itself (panel
+   Autofill for credentials, Outlook tab for links / codes) without asking. CAPTCHA, or anything
+   unclear or impossible → alert on the dashboard at once (`Q<n>` + screenshot), leave the tab open,
+   continue with other rows. Never fill made-up profile data (name, gender, …) to get past a form.
 7. **Credentials never go in files** — not in skills, profiles, runs, or commits. Logins live
    in the Chrome profile. If a password is needed mid-run, ask; use it once; don't record it.
 8. **Pace it.** Respect the bot's cooldowns; stop on rate-limit signals. Default cap is in
