@@ -11,7 +11,8 @@ Since 2026-11-18 `.mcp.json` starts it with `node` from a **global install**
 (`npm i -g chrome-devtools-mcp@1.13.0`, ~3 s), not `npx` (npx resolution hit Claude Code's 30 s
 MCP connect timeout in dashboard runs → "chrome-devtools CONNECT_TIMEOUT", no browser tools).
 Every **new** MCP process (each headless dashboard run) triggers Chrome's "Allow remote
-debugging?" prompt again; ask the user to click Allow at the start of the run.
+debugging?" prompt again; **click Allow yourself** with `scripts/allow-remote-debugging.ps1`
+(user standing OK, 2026-11-21) — see Connect.
 
 ## Facts on this machine
 
@@ -25,12 +26,19 @@ debugging?" prompt again; ask the user to click Allow at the start of the run.
 
 ## Connect
 
-1. Call any chrome-devtools tool (e.g. `list_pages`). On a new connection Chrome shows
-   **"Allow remote debugging?"** — the user must click **Allow** (there is no way around it on
-   the default profile dir). Tell the user *before* the call so they're watching.
+1. On a new connection Chrome shows **"Allow remote debugging?"**. Claude clicks **Allow** itself
+   (user, 2026-11-21: "whenever we face this, click Allow automatically" — no `Q<n>`):
+   start the watcher in the background, then make the first chrome-devtools call in the same turn:
+   ```powershell
+   powershell -NoProfile -ExecutionPolicy Bypass -File scripts\allow-remote-debugging.ps1 -TimeoutSec 90   # run_in_background
+   ```
+   then `list_pages`. The script (UI Automation) presses only a button named "Allow" in a Chrome
+   dialog whose text contains "remote debugging"; prints `clicked` / `not-found`. Worked first
+   time 2026-11-21. It covers this prompt only, no other Chrome permission dialog.
 2. Timeout "waiting for the browser connection" = dialog pending. `DevToolsActivePort` in the
-   User Data dir + a `node.exe` connection on 9222 confirm it. Ask the user to look in every
-   Chrome window (incl. minimized / RDP console). Max two retries, then wait for the user.
+   User Data dir + a `node.exe` connection on 9222 confirm it. Run the watcher again and retry
+   (max two). `not-found` twice → check `qwinsta` (UI Automation needs the RDP session attached,
+   not `Disc`), then ask the user (`Q<n>`) to click it / reconnect.
 3. After the MCP server restarts, page ids and `sw-N` change and the old snapshot is gone —
    `list_pages` + `take_snapshot` again before any `click`/`fill`.
 
