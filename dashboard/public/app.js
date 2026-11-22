@@ -279,23 +279,30 @@
   function renderOverview() {
     if (!state) return;
     const need = state.openQuestions.length + state.pendingApprovals.length;
-    const t = { applied: 0, todo: 0, queue: 0, error: 0 }; const per = { applied: [], todo: [], queue: [] };
-    let rows = [], shown = 0, total = 0;
-    for (const b of botsData) {
-      const s = b.state || {}; const c = s.counters || {}; const name = String(b.label || b.person || 'Bot').split(' ')[0];
-      const todo = (c.pending || 0) + (c.running || 0);
-      t.applied += c.applied || 0; t.todo += todo; t.queue += c.queue || 0; t.error += c.error || 0;
-      per.applied.push(`${name} ${c.applied || 0}`); per.todo.push(`${name} ${todo}`); per.queue.push(`${name} ${c.queue || 0}`);
-      rows = rows.concat(s.rows || []); shown += (s.rows || []).length; total += s.rowsTotal || (s.rows || []).length;
-    }
-    const has = botsData.length > 0; const sub = (k) => (botsData.length > 1 ? per[k].join(' · ') : '');
     const tile = (cls, label, v, note) => `<div class="tile ${cls}"><span class="tl">${label}</span><b>${v}</b><span class="tn">${esc(note || '')}</span></div>`;
-    const v = (x) => (has ? x : '–');
-    $('tiles').innerHTML = tile('ok', 'Submitted', v(t.applied), sub('applied')) +
-      tile(need ? 'warn' : '', 'Needs you', need, t.error ? `${t.error} row${t.error === 1 ? '' : 's'} stopped with errors` : '') +
-      tile('', 'To do', v(t.todo), sub('todo')) + tile('info', 'Tracked', v(t.queue), has ? sub('queue') : 'Open the bot window to see queue numbers');
-    $('breakdown').innerHTML = rows.length ? table('Job board', rows, boardOf) + table('Application system', rows, atsOf) +
-      (shown < total ? `<p class="muted small span2">Tables cover the ${shown} of ${total} rows the bot shares (active rows first); the tiles count every row.</p>` : '') : '';
+    const t = { applied: 0, todo: 0, queue: 0, error: 0 };
+    const sections = botsData.map((b) => {
+      const s = b.state || {}; const c = s.counters || {};
+      const name = String(b.label || b.person || 'Bot');
+      const todo = (c.pending || 0) + (c.running || 0); const err = c.error || 0;
+      t.applied += c.applied || 0; t.todo += todo; t.queue += c.queue || 0; t.error += err;
+      const rows = s.rows || []; const total = s.rowsTotal || rows.length;
+      const profile = b.profile || b.chromeProfile || '';
+      return `<section class="prof" aria-label="${esc(name)}">` +
+        `<div class="prof-head"><h2>${esc(name)} <span class="dot ${b.online ? 'on' : ''}" title="${b.online ? 'online' : 'offline'}"></span></h2>` +
+        `${profile ? `<span class="muted small">${esc(profile)}</span>` : ''}</div>` +
+        `<div class="tiles">${tile('ok', 'Submitted', c.applied || 0)}${tile(err ? 'warn' : '', 'Errors', err)}` +
+        `${tile('', 'To do', todo)}${tile('info', 'Tracked', c.queue || 0)}</div>` +
+        (rows.length ? `<div class="grid2">${table('Job board', rows, boardOf)}${table('Application system', rows, atsOf)}` +
+          (rows.length < total ? `<p class="muted small span2">Tables cover the ${rows.length} of ${total} rows this bot shares (active rows first); the tiles count every row.</p>` : '') +
+          '</div>' : '<p class="muted small">No rows shared yet.</p>') +
+        '</section>';
+    });
+    $('tiles').innerHTML = botsData.length
+      ? `<p class="totals">All profiles: <b class="ok">${t.applied}</b> submitted · <b>${t.todo}</b> to do · <b>${t.queue}</b> tracked` +
+        `${t.error ? ` · <b class="bad">${t.error}</b> errors` : ''} · <b class="${need ? 'warn' : ''}">${need}</b> need${need === 1 ? 's' : ''} you</p>`
+      : `<p class="totals muted">Open the bot window to see queue numbers.${need ? ` ${need} item${need === 1 ? '' : 's'} need you.` : ''}</p>`;
+    $('breakdown').innerHTML = sections.join('');
   }
   $('thread').addEventListener('click', async (e) => {
     const id = e.target.dataset.del; if (!id) return;
