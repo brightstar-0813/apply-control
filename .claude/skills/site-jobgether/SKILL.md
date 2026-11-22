@@ -28,6 +28,11 @@ Ashby) → bot submits. Anything else (Paylocity, Breezy, custom) → bot fills,
 2. Employer form: upload + fill. Paused → finish per `site-other` (or that host's skill), Submit only
    if the profile allows, confirm the thank-you page, **Mark applied ✓**, Start.
 
+**Employer job page (bot 2026-11-22):** when the employer link lands on the ATS *job page* (not the
+form), the bot now presses that page's own Apply entry once (same entry click as a direct ATS row,
+e.g. Workday Apply → Start Your Application), then fills / submits or pauses as usual. Before this,
+rows 92/95/96/97 (Cencora, Veradigm Workday) paused "No application form found on this page".
+
 ## Known blockers
 | Symptom | Class | Fix | Added |
 |---------|-------|-----|-------|
