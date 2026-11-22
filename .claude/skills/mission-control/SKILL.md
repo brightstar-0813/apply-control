@@ -53,7 +53,7 @@ These `cli.js` calls always pass the hook, even while paused.
 
 - **Status**: at session start, at each new row, and on every blocker. One line: person · source ·
   row/company/site · what you're doing. This is what the user sees first on the phone.
-  Parallel mode (apply-run §3c): one line for both, `Avash #24 … | Lewis #31 …`; every `Q<n>` names
+  Parallel mode (apply-run/parallel.md, on hold): one line for both, `Avash #24 … | Lewis #31 …`; every `Q<n>` names
   the person. Stop / Pause here act on Claude, not on the two bots (use the Bots tab for those).
 - **Questions**: use `say` with a `Q<n>` mid-run (the card appears at once); `slack-chat` still
   applies for numbering and wording. Don't also post the same question to Slack by hand. The Stop

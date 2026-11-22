@@ -5,52 +5,71 @@ description: Map of the BrightStar Bid Bot UI (popup / app window, Batch mode, q
 
 # bot-operate
 
-Operate the bot through its UI like the user: `take_snapshot` → find by accessible name/id →
-`click` / `fill` → read `#status`. Ids are from `C:\brightstar-bid-bot\popup.html`; if one is
-missing, grep `popup.html` and update this file.
+Operate the bot through its UI like the user: find by id → `click` / `fill` → read `#status`.
+Ids are from `C:\brightstar-bid-bot\popup.html`; if one is missing, grep `popup.html` and update
+this file. Background (Q&A bank internals, sheet / Apps Script, Slack messages, history) →
+`reference.md` in this folder, read only when needed.
 
-**Scope of settings:** everything below is stored in that Chrome profile's extension storage.
-It's shared by all bot persons in that Chrome profile and **not** shared with other Chrome
-profiles. Set it per profile from `profiles/<id>.md`.
+**Scope of settings:** stored in that Chrome profile's extension storage, shared by all bot
+persons in that profile, **not** shared with other Chrome profiles. Set per `profiles/<id>.md`.
 
-Status bar: `#status` (bottom). Read it after every action.
+## Token budget — read cheap, snapshot only to act
 
+A `take_snapshot` of the bot window or an apply form is 5–30k tokens; a screenshot ~1.5k. The
+scripts below return < 1k. Rules:
+- **Polling / "what's the state?"** → script A or B only. Never snapshot to poll.
+- **Apply form** → script C first; snapshot only the moment you need uids to click/fill, and
+  don't re-snapshot after every field (re-snapshot after uploads / step changes only).
+- **Confirmation check** → script D, not a screenshot.
+- **Screenshots** only for a CAPTCHA alert (`Q<n>`) or when layout itself is the question.
+- `list_pages` once per bind / after tab changes, not every poll.
+
+Scripts live in `C:\apply-control\scripts\cdp\` — call them with `evaluate_script`
+`sourcePath` (no code in the call) and `waitForStableDom: false`. All read-only.
+
+| | File | Run on | Returns |
+|---|------|--------|---------|
+| **A** | `bot-state.js` | bot page | `#status`, now-working, batch state, mode, submit, filter, counts by status, applied, rows needing attention (~400 tokens). Also works on the SW (`serviceWorkerId`; DOM fields come back empty) |
+| **B** | `queue-pending.js` | bot page | next 15 pending rows: `row \| company \| title \| host` (queue review) |
+| **C** | `form-summary.js` | apply tab | url, title, empty required fields, panel text, CAPTCHA present?, visible buttons |
+| **D** | `confirm-check.js` | apply tab | `confirmed` + the matched thank-you / received sentence |
+
+Need something else? Write a small read-only script returning just those fields; save it there
+if it'll be reused.
 ## Bid tab — jobs queue
+
+Status bar: `#status` (bottom). Read it (script A) after every action.
 
 | Control | Id / name | Notes |
 |---------|-----------|-------|
-| Allow batch process | chips "Yes"/"No" (`#allowBatchYes #allowBatchNo`) | Must be **Yes** to see the queue |
+| Allow batch process | `#allowBatchYes #allowBatchNo` | Must be **Yes** to see the queue |
 | Load from | CSV / Google Sheet buttons | |
 | Jobs sheet URL | textbox "Jobs sheet URL" + **Save URL** (`#saveJobsSheetUrlBtn`) | From profile file |
 | Capture tab | textbox "Capture tab" | e.g. `US-SF-Jobs` |
-| Load from sheet | `#loadSheetJobsBtn` | Ingests jobs → queue. Never starts |
-| CSV | `#csvFile #csvRefresh #csvPinFile` | Upload = **fresh queue** (old statuses dropped). `upload_file` only reads files under the MCP `--workspace` roots → copy the CSV to `C:\apply-control\.uploads\` (git-ignored). If `#status` doesn't show "Parsing CSV…", dispatch `change` on `#csvFile`. Sources: `C:\brightstar-sf-job-capture\download\jobs_latest.csv` (all boards) — the sheet capture tab may have no Dice jobs |
-| Sheet calls | Apps Script web app (**shared** with brightstar-sf-job-capture — same deployment) | Both repos must keep an identical merged `apps-script/Code.gs` (all actions: append, appendWarehouse, replaceWarehouse, listRows, listLinks, listCaptureJobs, markApplied). If one side drifts, the other side's deploy drops actions. Check live actions: POST `{action:"bogus"}` → the error lists them. Error "missing listCaptureJobs" → user must redeploy the merged `apps-script/Code.gs` (Deploy → Manage deployments → Edit → New version). "Checking Google Sheet…" stuck > 2 min → requests have no timeout; reload the bot (queue survives) |
-| Source filter | `#filterBuiltin #filterHimalayas #filterGreenhouse #filterDice #filterJobright #filterWorkday #filterEtc`("Other") `#filterAll` (`#filterLinkedIn` exists — never use it, rule 11) | By job **link host**. Hint `#sourceSubmitHint` says what Start will do |
-| Counters | QUEUE / DONE / APPLIED / PENDING / SKIPPED / ERROR | Baseline before, compare after |
+| Load from sheet | `#loadSheetJobsBtn` | Ingests jobs → queue. Never starts. Sheet errors → `reference.md` |
+| CSV | `#csvFile #csvRefresh #csvPinFile` | Upload = **fresh queue** (old statuses dropped). `upload_file` only reads files under the MCP `--workspace` roots → copy the CSV to `C:\apply-control\.uploads\` (git-ignored). If `#status` doesn't show "Parsing CSV…", dispatch `change` on `#csvFile`. Source: `C:\brightstar-sf-job-capture\download\jobs_latest.csv` (all boards) |
+| Source filter | `#filterBuiltin #filterHimalayas #filterGreenhouse #filterDice #filterJobright #filterWorkday #filterEtc`("Other") `#filterAll` (`#filterLinkedIn` — never, rule 11) | By job **link host**. Hint `#sourceSubmitHint` says what Start will do |
+| Counters | QUEUE / DONE / APPLIED / PENDING / SKIPPED / ERROR | Script A `by` gives the same numbers |
 | Output folder | `#outputDir` | Defaults to person sheet tab |
-| **Batch mode** | chips `#batchModeGenerate` "Generate" / `#batchModeApply` "Generate + Apply" (storage `batch_run_mode`), right above Start | **Generate** = build files only, never applies (any source, Dice too). **Generate + Apply** = build job N → apply job N → build N+1, on any filter incl. All. **LinkedIn rows are never applied.** Unset = old behaviour (Dice/Greenhouse filter apply, others generate). Policy: `batch-apply-policy.js` |
+| **Batch mode** | `#batchModeGenerate` "Generate" / `#batchModeApply` "Generate + Apply" (storage `batch_run_mode`) | **Generate** = build files only. **Generate + Apply** = build N → apply N → build N+1, any filter. **LinkedIn rows never applied.** Policy: `batch-apply-policy.js` |
+
+**Before clicking a source filter:** read `all_us_jobs` and `job_queue` lengths (read-only). A
+filter click rebuilds the queue from `all_us_jobs`; if `all_us_jobs` is empty, stop and ask.
 
 ## Queue controls
 
 | Control | Id | Meaning |
 |---------|----|---------|
-| Start | `#batchStart` | Runs pending rows per Batch mode; also resumes a paused batch and retries a paused apply |
+| Start | `#batchStart` | Runs pending rows per Batch mode; also resumes a paused batch / retries a paused apply |
 | Pause / Skip / Stop | `#batchPause #batchSkip #batchStop` | Skip = current row |
 | Sync with sheet | `#syncSheet` | Reconcile queue with sheet Ready/Applied |
 | Save JSON | `#forceSaveChatgpt` | AI JSON on page but not harvested |
-| Retry errors | `#retryErrors` | |
+| Retry errors | `#retryErrors` | Re-queues error rows **and starts the batch** |
 | Clear queue / Reset | `#clearJobs #reset` | **Ask the user first** — destructive |
-| Queue list | `#queueList`, `#queueSearch`, `#queueNowWorking` | Row actions: open link, Files, Remove (pending only), Retry (error), **Mark applied ✓** (done & not applied), **Apply** |
-| (row buttons disabled after Stop/Pause) | — | Old builds kept Remove / Mark applied disabled until a reload (fixed 2026-11-15). If seen: reload the bot page. Clicking from the page: find the row in `#queueList`, its `aria-label` "Remove" / "Mark applied" button; confirm dialog is `[role=alertdialog]` — check it names the right job first |
-| Mark skipped ⏭ | row button (bot 437a05e) | `mark_queue_job_skipped` → sheet `Skipped — <reason>` over "Ready", row attempts used up (`skippedByHand`) so Start never reopens it. Shown on done/skipped rows not applied; disabled while running. Opens a native `window.prompt` prefilled with a short reason (closed / hybrid/on-site / non-US / duplicate of applied row N / needs review) — answer it with `evaluate_script` `dialogAction: "<reason>"`. Keep reasons short (user 2026-11-16). Find the row by `.queue-item` whose **first line** is the row number — matching any line equal to N also hits ATS scores (a "69" click once landed on row 105) |
-| Mark applied ✓ | row button | `mark_queue_job_applied` → sheet Applied + queue `applied`. Use only after a confirmed submission done by hand (Claude/user). Shown on `done` rows and (since 2026-11-15) on rows skipped as **duplicate** that aren't applied yet, e.g. a row re-marked duplicate by a sheet reload before you submitted it |
-| Apply (row) | row button | Manual apply assist for that row (opens job + panel). Non-hosted rows get marked Applied on the sheet when opened — don't use it just to "check" a row |
-
-**Before clicking a source filter:** read `all_us_jobs` and `job_queue` lengths (SW/page, read-only).
-A filter click rebuilds the queue from `all_us_jobs` and saves it. On 2026-11-15 Avash had
-`all_us_jobs = []` with 211 queued rows → the Dice click wiped the queue. popup.js now guards this
-(seeds the master list from the queue), but still check first; if `all_us_jobs` is empty, stop and ask.
+| Queue list | `#queueList`, `#queueSearch`, `#queueNowWorking` | Row actions: open link, Files, Remove (pending only), Retry (error), **Mark applied ✓**, **Apply**. From the page: row's `aria-label` "Remove" / "Mark applied" button; confirm dialog `[role=alertdialog]` — check it names the right job |
+| Mark skipped ⏭ | row button | Sheet `Skipped — <reason>`; Start never reopens it. Opens a native `window.prompt` → answer with `dialogAction: "<reason>"` (short: closed / hybrid/on-site / non-US / duplicate of applied row N / needs review). Find the row by `.queue-item` whose **first line** is the row number (any-line match hits ATS scores) |
+| Mark applied ✓ | row button | Sheet Applied + queue `applied`. Only after a confirmed submission by hand. On `done` rows and on not-yet-applied **duplicate** skips |
+| Apply (row) | row button | Manual apply assist (opens job + panel). Non-hosted rows get marked Applied on the sheet when opened — don't use it just to "check" a row |
 
 Row statuses: `pending`, `running`, `done`, `skipped`, `error` (+ `applied`, `applyAttempted`,
 `applyAttempts` (max 2 per batch), `inactive`, `error` text).
@@ -60,21 +79,14 @@ Row statuses: `pending`, `running`, `done`, `skipped`, `error` (+ `applied`, `ap
 | Control | Id | Notes |
 |---------|----|-------|
 | Autofill enabled | `#autofillEnabledToggle` | |
-| Allow auto submit | `#allowSubmitToggle` (storage `allowSubmitOnAssist`) | Panel / manual Apply submit. Only per profile file / user (CLAUDE.md rule 3) |
+| Allow auto submit | `#allowSubmitToggle` (storage `allowSubmitOnAssist`) | Only per profile file / user (rule 3) |
 | API Custom Q&A | `#openaiQaToggle` | AI answers leftover questions |
 | Autofill / Auto Apply / Custom Q&A | buttons | Act on the active tab |
-| Q&A bank | `#qaOpenEditorBtn`, learn mode `#qaLearnToggle` | Learn mode saves answers typed on forms |
-| Clean junk Q&A | `#qaPruneJunkBtn` → confirm **Clean** in `[role=alertdialog]` | Deletes bank rows failing `isBankableQa` (editor rows kept); count label shows the new total |
+| Q&A bank | `#qaOpenEditorBtn`, learn mode `#qaLearnToggle` | Editor rows win over scraped/AI rows; internals → `reference.md` |
+| Clean junk Q&A | `#qaPruneJunkBtn` → confirm **Clean** in `[role=alertdialog]` | |
 
-**Q&A bank behaviour (since bot `af07f98`):**
-- Every save goes through `isBankableQa` (`autofill-junk.js`). Page chrome, trackers, cookie and consent toggles, report-job options, work-history rows, placeholders, markup, option ids, URLs, a bare "Please specify", and a Yes/No answer to a "which/what" question are all dropped. Rows typed in the editor (`source: user-editor`) are trusted and never overwritten.
-- Reuse goes through `findQaMatches`, which returns ranked candidates (threshold 0.82; Yes/No answers need ≥0.9 similarity). The runner takes the first candidate that fits.
-- Pay questions never use the bank; they use the standard pay rule. Contact and sensitive fields come only from the profile.
-- If the bank fills up with junk again: preview read-only first (import `autofill-junk.js` on the bot page and run `isBankableQa` over the `brightstar_qa`/`qa_bank` rows). Then add the new junk pattern plus a test to `tests/qa-bank-gate.test.js`, reload, and click Clean junk.
-- To make an answer reliably reusable, add it in **Open editor**; editor rows win over scraped and AI rows.
-
-Batch submit itself is decided by Batch mode + `ats/adapters.js` (sites with an adapter submit;
-others fill and pause). External Indeed is never auto-submitted.
+Batch submit = Batch mode + `ats/adapters.js` (adapter sites submit; others fill and pause).
+External Indeed is never auto-submitted.
 
 ## Other sections
 
@@ -83,49 +95,8 @@ others fill and pause). External Indeed is never auto-submitted.
 - Person: `#profileSelect`; inline editor `#inlineProfileSelect #inlineRoleTrackSelect`, `#inlineProfileSave`.
 - AI engine: `#aiProviderChatgpt #aiProviderClaude #aiProviderClaudeApi #aiProviderOpenai`.
 - Settings tab: `#spreadsheetUrl #sheetsWebAppUrl #sheetTabName`, pacing `#chatgptJobGapSec #chatgptHardPauseHits`, Slack.
-
-## In-page Autofill panel (ATS tabs)
-
-`[data-brightstar-autofill-panel]` on supported hosts: fills from profile + Q&A bank, uploads
-the row's PDFs, lists unanswered required questions. Answer them from profile / Q&A / user.
-
-## Reading state (read-only, service worker)
-
-```js
-async () => {
-  const d = await chrome.storage.local.get(["job_queue","batch_state","generation_status","batch_run_mode","allowSubmitOnAssist","job_channel_filter"]);
-  const q = d.job_queue || []; const by = {};
-  for (const j of q) by[j.status] = (by[j.status]||0)+1;
-  return { batch_state: d.batch_state, status: d.generation_status, mode: d.batch_run_mode,
-    submit: d.allowSubmitOnAssist, filter: d.job_channel_filter, by, applied: q.filter(j=>j.applied).length,
-    attention: q.filter(j => j.status==="error" || (j.status==="done" && !j.applied && j.error))
-      .map(j => ({ row: j.csvRow, company: j.company, err: j.error, link: j.jdLink })) };
-}
-```
-
-## Tracking sheet and Slack
-
-- **Sheet** (Settings tab: `#spreadsheetUrl`, Apps Script `#sheetsWebAppUrl`, person tab
-  `#sheetTabName`): build → row **Ready** (Bid mode `Auto bid`); bot submit or **Mark applied** →
-  same row (upsert by job link) **Applied M/D/YYYY h:mm**. A sheet failure never fails the job —
-  the row error says "sheet mark failed"; fix config, then Mark applied again. A link already
-  **Applied** on the sheet is skipped (dedupe = job link).
-- **Slack** (`slack_webhook_url`, Settings → Show pacing & Slack → Incoming Webhook URL + **Test**;
-  set in Lewis + Avash, one shared channel, person named in each message):
-  - **Applied ✅** — every submit (bot) and every **Mark applied** (by hand), with site + sheet result.
-  - **Needs hand-off 🖐️** — batch paused on a no-adapter board (Jobright, Builtin,
-    Himalayas, Other, Indeed external), with unanswered questions. Left unfinished and retried →
-    **Job skipped ⏭️** "Not applied — moved on".
-  - **Job error — retrying ⚠️ / Job failed ❌** — real failures on adapter sites and generation.
-  - Batch paused / failed / ChatGPT rate limit, required field unanswered (adapter sites),
-    duplicate skips, batch complete summary.
-  - **Verify in Slack:** the channel is open in the **Tools** profile (`Profile 3`, Slack tab titled
-    "… - Bid Bot - Slack"). Read-only: `take_snapshot` of that tab only — never type or click send.
-  - **Two-way with the user:** Claude posts via `scripts/slack-post.ps1` and reads the user's
-    replies there — see `slack-chat`.
-  - Text built by `buildSlackJobStatusText` in `slack.js`; hand-off boards = `isHandoffBoard`
-    in `batch-apply-policy.js`. Empty webhook → nothing sent, silently.
-- Webhook URLs are secrets: enter them in the bot UI only, never in files or the run log.
+- In-page Autofill panel: `[data-brightstar-autofill-panel]` on supported hosts — fills from
+  profile + Q&A bank, uploads the row's PDFs, lists unanswered required questions (script C reads it).
 
 ## Where behaviour lives (for blocker-fix)
 
@@ -133,4 +104,4 @@ batch loop, sheet, `mark_queue_job_applied` → `background.js`; batch apply pol
 `batch-apply-policy.js`; apply orchestration → `autofill-runner.js`; DOM fill →
 `content/autofill.js`; panel → `content/autofill-panel.js`; submit policy → `ats/adapters.js`;
 Workday policy → `content/workday-engine.js`; Indeed hosted/external → `indeed.js`; source
-filter → `csv.js`; popup → `popup.html` / `popup.js` / `popup.css`.
+filter → `csv.js`; popup → `popup.html` / `popup.js` / `popup.css`; Slack text → `slack.js`.

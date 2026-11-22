@@ -11,7 +11,7 @@ Arguments: `<person> <source> [cap] [extra notes]`. Example: `avash dice 10`.
 |------------|-------------|----------------|
 | `avash` (default) | avash-chapagain | `Profile 2` |
 | `lewis` | dmario-lewis | `Profile 1` |
-| `both` | both of the above, in parallel | apply-run §3c (one Claude alternating; preflight + queue go per profile) |
+| `both` | both of the above, in parallel | apply-run/parallel.md (on hold; one Claude alternating, preflight + queue go per profile) |
 
 Any other person → stop and say they aren't enabled (CLAUDE.md rule 1).
 

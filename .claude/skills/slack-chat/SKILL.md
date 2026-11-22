@@ -65,8 +65,10 @@ powershell -NoProfile -File scripts/slack-post.ps1 -Text "<message>"
 ## Read (user → Claude)
 
 - Tab: Slack in **Tools** (`Profile 3`), title "… - Bid Bot - Slack", on the
-  `louis.michael9523` DM. `select_page` it → `take_snapshot`. Read-only: never type, click,
-  react, or switch tabs there (CLAUDE.md rule 1).
+  `louis.michael9523` DM. Read-only: never type, click, react, or switch tabs there (CLAUDE.md rule 1).
+  **Cheap read first** (`evaluate_script` on that page, no snapshot):
+  `() => [...document.querySelectorAll('[data-qa="message_container"]')].slice(-8).map(e => e.innerText.replace(/\s+/g,' ').slice(0,300))`
+  Empty result (Slack DOM changed) → `take_snapshot` once and fix the selector here.
 - **A user message** = posted by `louis.michael9523` (not under **Alert APP**). Bot alerts and
   Claude's own posts are both under Alert; ignore them as input.
 - Track the newest user message you've handled (time + first words) in the run log under
@@ -75,7 +77,9 @@ powershell -NoProfile -File scripts/slack-post.ps1 -Text "<message>"
 
 ### When to check
 
-- Every apply-run poll cycle (30–60 s) while the batch runs.
+- Dashboard up → check Slack only at a pause, while a `Q<n>` is open, and at session end — not
+  every poll (dashboard messages already arrive as `[Mission Control]` context).
+- Dashboard down → every apply-run poll cycle while the batch runs.
 - After posting a question, wait in place: check, then wait ~60 s
   (`Monitor` with a timer, or `wait_for` on the Slack tab), check again. **Don't end your turn to
   wait.** A Slack reply can't wake a session that's idle. While waiting, keep doing work that
@@ -117,35 +121,9 @@ A "Thank You for Applying" / status / interview thread for the same requisition 
 don't apply again, don't Mark applied, log it, tell the user (Wintrust #73: applied 10/20, interviewed
 11/2; the new-account sign-in failed because the old account has another password).
 Verification links / OTP codes: read them from the same Outlook tab yourself.
-Old flow kept below for reference.
-
-User decision 2026-11-15 (superseded): Claude creates accounts, using Chrome's suggested password.
-Never on job boards / aggregators (Jobgether, Built In, Himalayas, Jobright, LinkedIn), only on the
-employer ATS the application needs (Workday tenant, iCIMS, Taleo, SuccessFactors, Oracle, …).
-
-1. **Existing account first.** Sign-in page with the email already known to Chrome
-   (autofill offers it) → sign in with Chrome's saved password the same way (focus password →
-   accept the autofill entry). Works → continue, no Slack question.
-2. **Ask:** `Q5 (Avash #31 Acme, Workday acme.wd5): needs an account. Reply "Q5 create" (I sign up
-   with Avash's profile email + Chrome-suggested password), "Q5 done" (you did it in Avash's Chrome),
-   or "Q5 skip".` Keep working other rows while waiting (Pause → park the row if the batch needs it).
-3. **create:**
-   - Email (and name if asked) from the bot person profile; terms checkbox only if required to apply.
-   - Password field: `click` it, then `press_key` ArrowDown → Enter on Chrome's
-     **"Use suggested password"** popup. Confirm-password field is filled by Chrome. Check it took:
-     the field is non-empty (`evaluate_script` returning `el.value.length > 0` only, never
-     the value). Never `fill` or `type_text` a password, never snapshot with `verbose` on that
-     form.
-   - **Tested 2026-11-16 (Wintrust Workday, Avash): no suggestion appeared** (click + ArrowDown/Enter left both fields empty; the popup is likely only offered on real user focus or with Chrome sync/password manager on). Expect the fallback below until it works once.
-   - No suggestion appears (password manager off, site blocks it) → don't invent one; post
-     "Q5: Chrome didn't offer a password here, please create it and reply Q5 done".
-   - Submit sign-up. Chrome saves a generated password automatically on submit.
-4. **Email verification / OTP** → post "Q6: verification email sent to Avash's inbox from Acme
-   Workday. Click the link (or send the code in the terminal), then reply Q6 done". Reading the
-   person's mailbox needs the user's separate OK.
-5. **done** from the user → `take_snapshot` the tab, continue the application as normal.
-6. Log: account created on which host, for which person, date. Never the password.
-   New host with accounts → note it in that site skill's Known blockers.
+Never create accounts on job boards / aggregators (Jobgether, Built In, Himalayas, Jobright, LinkedIn) — only on the
+employer ATS the application needs. Log: host, person, date — never the password. New host with accounts → note it in
+that site skill's Known blockers. (The superseded 11-15 Chrome-suggested-password flow is in git history.)
 
 ## Log
 

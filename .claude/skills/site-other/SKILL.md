@@ -21,183 +21,29 @@ description: Host → site-skill routing table for BrightStar Bid Bot apply tabs
 | `himalayas.app` | site-himalayas | pauses |
 | `builtin.com` | site-builtin | pauses |
 | `recruiting.paylocity.com` | site-paylocity | pauses (hand finish) |
-| anything else | this skill | pauses |
+| anything else | this skill (+ `hosts.md` section if listed below) | pauses |
 
 (When `blocker-fix` creates a new `site-*` skill, add its host here.)
+
+## Hosts with notes in `hosts.md`
+
+UKG / UltiPro (`recruiting.ultipro.com`) · UKG careers (`apply.ukg.com`) · JazzHR (`*.applytojob.com`) ·
+BambooHR · Rippling (`ats.rippling.com`) · Jobvite · CareerPlug · Dayforce · Oracle Cloud HCM
+(`*.oraclecloud.com`) · ADP Workforce Now · Zoho Recruit · SuccessFactors · arc.dev · SkipTheDrive · arbeitnow
+
+**Read only your host's section:** `Grep "^## " hosts.md` → line numbers → `Read` with offset/limit.
+Never load the whole file. Add new single-sighting notes there as a `## Name (host)` section.
 
 ## Generic flow (paused row on an unknown host)
 
 1. Panel present? (`[data-brightstar-autofill-panel]`; manifest covers icims, taleo,
-   successfactors, bamboohr, smartrecruiters, jobvite, ultipro.) Otherwise fill by hand with
-   `take_snapshot` + `fill` / `click` / `upload_file`.
+   successfactors, bamboohr, smartrecruiters, jobvite, ultipro.) Run `bot-operate` script C to see
+   empty required fields; otherwise fill by hand (`take_snapshot` + `fill` / `click` / `upload_file`).
 2. Find the apply entry (Apply / Apply now / I'm interested); prefer guest apply.
 3. Contact from the bot person, resume (+ cover letter) from the row folder, questions from
    profile / Q&A bank / user, EEO = exact values per profile (never Decline / Prefer not to say; unknown → ask).
-4. Submit only if the profile allows → confirmation page → row **Mark applied ✓** → Start.
-
-## Host notes (single sightings; promote to a site skill on repeat)
-
-- **UKG / UltiPro** (`recruiting.ultipro.com/<tenant>/JobBoard/…/OpportunityDetail`): **Apply now** → `signin-us.ultipro.com`
-  (Auth0 log in / **Sign up**: email + password + Continue). The panel's Autofill fills **0**: `detectPageBlocker()` flags
-  any non-Workday password field as "sign-in form" before the credential fill runs. Until that is fixed (needs the
-  user's OK, since it touches account creation), skip the row and log it. (Frontier Energy, 2026-11-18)
-
-- **JazzHR** (`<co>.applytojob.com/apply/<id>/<slug>`; board at `<co>.applytojob.com/apply`): one-page form, the
-  in-page panel detects it. Resume via "Attach resume". Yes/No answers are checkbox pairs. Required **X (Twitter)** field,
-  many required essay boxes, a **"Human Check" reCAPTCHA** (human-only, rule 6) and **SUBMIT APPLICATION** is a link.
-  Prison Fellowship (Himalayas row, 2026-11-18) also requires typing the full legal name to certify the application and
-  that you have read their **Statement of Faith**. That is a personal attestation: ask the user, never sign it. Paused row → log,
-  leave the URL, Skip.
-
-- **BambooHR** (`<co>.bamboohr.com/careers/<id>`): **Apply for This Job** shows a one-page form.
-  Custom "*" questions are often required (years-of-X, Trailblazer URL). Custom selects: click the button, then the
-  `[role=option]`. Match the education option exactly ("College - Bachelor of Science", not the first "Bachelor").
-  The essay textarea ignores `fill`, so click it and `type_text`. Ends with a visible **"I'm not a robot" reCAPTCHA**,
-  which is human-only. The Submit button sits in the dark footer bar. (USAC, 2026-11-15)
-- **Rippling** (`ats.rippling.com/<co>/jobs/<id>`): **Apply now** opens a one-page form (`…/apply?step=application`).
-  Uploading the resume parses it into name, email, phone, company and location, so upload it first. Re-snapshot after
-  each upload, because uids change. Dropdowns have no options in the a11y tree: click the combobox, then use ArrowDown and
-  read `aria-activedescendant` until the right option is highlighted, then Enter. Location is a Google Places box:
-  type "City, ST" and pick the suggestion. Rating questions use Strong No / No / Yes / Strong Yes radios.
-  **An invisible Cloudflare Turnstile is on the page (`#turnstile-container`):** a CDP click on **Apply** sends nothing
-  (no POST, no error), so it's human-only. Ask the user to click Apply. (Offprem Technology, 2026-11-15)
-- **Jobvite** (`jobs.jobvite.com/<co>/job/<id>/apply`): short form (Council Advisors #76, 2026-11-16): **Add Resume** opens an "Attachment Options" dialog → `upload_file` on its ` File` button; same for **Add Cover Letter**; First / Last / Email; **Send Application** → `…/applyConfirmation` "Application Sent!". No account, no CAPTCHA seen. The in-page panel shows *Allow auto submit* checked here — fill by hand rather than panel Autofill if you need to review first.
-- **CareerPlug** (`<co>.careerplug.com/jobs/<id>/apps/new`): one page, no account. Name / email / phone, SMS opt-in radio (rule 5), Address / City / States combobox (fill "Virginia") / ZIP, Resume + Cover Letter "Upload File" buttons (upload_file works), Recent Job Title / Employer (from the master resume, Avash = Senior Salesforce Specialist / Attain Partners). **Submit Application** opens a reCAPTCHA v2 image challenge → user (rule 6). Done = "Thank You, <name>! We have received your information…" at `…/apps/<n>` (Ensisinfo #74, 2026-11-16).
-  2026-11-19 (Lewis): the tenant host is `ensisinfo-inc.careerplug.com` (`ensisinfo.` lands on CareerPlug's own sign-in). The board has
-  several pages: `fetch('/jobs?page=n')` from the tab and match the title to get `/jobs/<id>`. Submit went straight to the thank-you
-  page, **no reCAPTCHA challenge** that time, so always try Submit before asking the user.
-- **Dayforce** (`jobs.dayforcehcm.com/<co>/candidateportal/jobs/<id>/apply`): use **Apply without an Account**. The SMS dialog
-  defaults to "do not consent", so just Save. Reject cookies; if the Cookie Preference Center opens, Save it.
-  The flow is Candidate Info → Questionnaire (1..n pages) → Submit (acknowledgement checkbox + Submit). It has an
-  invisible reCAPTCHA but submitting worked.
-  - **Import Resume** (upload to that button) parses name, email, phone, city and *all* employment rows. Each
-    resume row opens as an edit form; they close on their own once you save personal info.
-  - Personal info: Confirm Email, LinkedIn, address, zip, then the antd selects (Preferred Contact, Country, State,
-    How did you hear) and **Update Personal Information**. Country and State are searchable: focus the input,
-    type, then Enter. "How did you hear" isn't searchable: arrow to the option (ArrowUp wraps to the last one;
-    "himalayas.app" is listed).
-  - Cover letter: the hidden `#jobPostingApplication_files_coverLetter` needs a style tweak before `upload_file`.
-  - Questionnaire text inputs sometimes ignore `fill`: focus the input by id, `type_text`, then check the value length.
-  - Done page: `/apply/success` "Congratulations… confirmation number …". References are optional. (Parking Management Co, 2026-11-15)
-
-- **Oracle Cloud HCM** (`*.fa.*.oraclecloud.com/hcmUI/CandidateExperience/.../job/<id>`, e.g. SAIC): APPLY NOW → email
-  + terms (click the label text; the checkbox ignores clicks) → **6-digit code by email** ("Confirm your identity" from
-  "<Co> Careers"; type it into digit box 1) → one long page.
-  - **Inactivity timeout:** "Are You Still With Us?" signs you out after a few idle minutes, and you land on Search Jobs.
-    Don't stop to ask the user mid-form: collect questions first, or expect to log back in (new code). The draft is kept.
-  - Import the resume first: it fills contact info, work history and education. Then delete wrong or extra rows (only
-    the past 5 years of work; no certificates in education). Education needs Degree radio, Major (type + gridcell),
-    Graduated, and a **full** date (month + year).
-  - Dropdowns are grids: click the combobox, then the `gridcell`. Address Line 1 is a lookup: type the street, pick the
-    full "…, CITY, STATE, ZIP" cell.
-  - SAIC questions: gov employment status, work authorization, ex-SAIC, salary band, relocate, active clearance,
-    veteran status, e-signature Full Name. Done = redirect to `my-profile` with "Application Received".
-    (SAIC, 2026-11-15)
-
-- **ADP Workforce Now** (`workforcenow.adp.com/mascsr/default/mdf/recruitment/recruitment.html?cid=…&jobId=…`), seen twice
-  (MyComputerCareer `cid=43596bb7-dd65-472e-afd5-7e70c43c3f63&jobId=584177`, Silotech, 2026-11-15): **Apply** → name / email / mobile → **Continue** → "Get your verification code":
-  pick the **email** radio → code from `SecurityServices_NoReply@adp.com` ("Here's your verification code from ADP"; open the
-  newest one, the preview may hide the code) → Verify.
-  - Steps: Personal Information → Resume → Questions → Voluntary Self-ID → Review → Self-Attest & Submit.
-  - Personal info: Country combobox may be empty; choosing it **clears the address**. Then type Address Line 1 (Google Places),
-    ArrowDown + Enter on the "…Falls Church, VA, USA" suggestion → city/state/zip/county fill. SMS opt-in checkbox: focus + Space.
-  - Resume/attachments: unhide both `input[type=file]` via style, re-snapshot, `upload_file` (resume, then cover letter).
-  - **The sticky Previous / Finish later / Next bar overlaps fields**: scroll the target into the middle before clicking or you
-    hit Previous (answers survive). Near the page bottom the field can't scroll clear of the bar and a click lands on
-    **Finish later** (drops unsaved answers, back to My Applications → "Saved for Later" → Complete Your Application):
-    open such dropdowns by **focus + Enter** instead, pick the option by snapshot uid, press Escape before the next one.
-    Answers are stored only on **Next**.
-  - 2026-11-18 (Lewis): the board link can be a **closed copy** ("We are no longer accepting applications") — open
-    **Current Openings** on the same `cid` and take the live `jobId` (MCC 590416). The page only renders once its tab is in
-    front (`select_page bringToFront`). **Continue** is an invisible-reCAPTCHA `sdf-button`: if nothing happens, reload the
-    job URL, focus `#guestFirstName` by script, `type_text` each field with Tab, then Enter → "Get your verification code".
-    The `click` tool fails on most ADP controls ("did not become interactive"): focus inputs by id from a script
-    (`PersonalAddress_country`, `…_address_line1`, `…_city`, `…_postalCode`, `question_<n>`, `desiredSalaryId`) and
-    `type_text`; radios are `sdf-radio-button#questionYes_<n>` / `#questionNo_<n>` → click the inner shadow `input`;
-    State and currency are `sdf-select-simple` → click its shadow trigger, then `.click()` the `sdf-select-item`.
-  - Each new apply tab asks for its **own** email code, even with another ADP tab signed in. Outlook search
-    `SecurityServices_NoReply@adp.com` and open the **newest time** (threads group codes; the old code stays on top of the
-    "verification code" search for a while). Later applications reuse the profile (address, Self-ID) — still check it.
-  - Multi-select questions (e.g. "Which Salesforce certification(s)"): the menu closes after each pick; **click the
-    combobox with the click tool** before each option (a script `click()` doesn't reopen it). Picked = "Remove <option>" buttons.
-  - Questions: radios + text; desired salary needs **currency USD** too. Self-attest: checkbox (focus + Space) **and** a
-    "Please type your full name" box before Submit.
-  - Done = "Thank You! We have received your application" or "Application Submitted!". An optional **WOTC** tax-credit
-    questionnaire may follow; skip it.
-- **Zoho Recruit** (`<tenant>.zohorecruit.com/jobs/Careers/<id>`, seen 2026-11-16 VG & Partners via Himalayas
-  → "I'm ready to apply" interstitial → new tab). Job page → **I'm interested** → one-page form, no account
-  needed (ignore "Easy Apply" sign-in). The bot panel did not load there; fill by hand: name, email, mobile
-  (+1 preset), street, ZIP/City/State are autocomplete comboboxes (type the value, then Escape the menu),
-  Country text, LinkedIn; Resume = `upload_file` on the "Resume" Browse block. Salary on Zoho may differ from
-  Himalayas (use Zoho's posted range). **Image CAPTCHA before Submit Application** → human-only: fill everything
-  else, leave the tab open, ask in Slack.
-  Some tenants (blackfinconsult, 2026-11-17): **Skill Set is required** — click "Search and add skills", type
-  "Salesforce", click the suggested chip; the resume `input[type=file]` is hidden (unhide via style, then
-  `upload_file`); most jobs have Next → an "Assessment" step after the CAPTCHA, some submit directly.
-  Job ids + titles are in the careers page's hidden `input` JSON (`Posting_Title`, `id`); salary only on the job page.
-
-- **Rippling** (`ats.rippling.com/<tenant>/jobs/<id>/apply`, seen 2026-11-16 e.Republic). One page; bot
-  fills most and stops at "step limit". Finish by hand: required custom essay (write it only from the
-  master resume's facts), Hispanic/Latino listbox (`[role=option]`), SMS radio, cover-letter upload on the
-  "Drop or select" button, and **Location must be picked from its suggestion list** ("Falls Church, VA, USA").
-  **Apply is gated by Cloudflare Turnstile**: our click sends no submit request (only `cdn-cgi/challenge-
-  platform` pings) → human-only; leave the filled tab and ask the user to click Apply. If the user closes
-  the tab, Start reopens the row and the bot refills it (essay/cover letter/location need redoing).
-
-- **arc.dev** (`arc.dev/remote-jobs/j/<slug>`, seen 2026-11-16 Nubestic, Komodo Health). Job board; "Apply now" →
-  `/redirect/<key>` → **arc sign-up wall** (never sign up on a job board). Bot pauses with "No Next/Submit button".
-  "Remote restrictions apply" hides the country: read the JD text (Nubestic = "100% remoto desde España") or find the
-  same title on the employer ATS (Komodo: `boards-api.greenhouse.io/v1/boards/<co>/jobs` → location India). US + ATS
-  found → apply there; else Mark skipped with the country.
-
-- **UKG careers** (`apply.ukg.com/careers/apply?pid=<id>`, seen 2026-11-16 UKG #205). One page, no account.
-  Panel Autofill **puts the email into the Phone field** and leaves Email flagged: click the field's "Clear"
-  button, click the field, `type_text` (plain `fill` appends). A **Data Privacy Agreement** modal appears →
-  "I Agree" (leave job-recommendation emails unchecked). Comboboxes (Country code, Country, State, Yes/No
-  questions): click, `type_text` the option, then click the `[role=option]` inside the input's
-  `aria-controls` list. **Start date: "Today" is rejected** ("cannot be in the past", UKG's clock runs a day
-  ahead) → pick tomorrow. Two "I Accept" consents. Done = `/apply/success` "Thank you for your application".
-
-- **SkipTheDrive** (`skipthedrive.com/job/<slug>`): aggregator, no adapter. The bot pauses with "Reached Submit (Search)" (it reads
-  the site search button as Submit). The employer link is the **"Apply for this position"** anchor: open that host and continue with
-  its skill. EBizCharge (→ `ats.rippling.com/ebizcharge`) uses one long Rippling form for every role: emergency contact, supervisor
-  contact, reason for leaving, 3 professional references → not in any profile → Mark skipped "needs references + emergency contact"
-  (user, 2026-11-15, same answer applied to Lewis 2026-11-19).
-- **arbeitnow** (`arbeitnow.com`, `arbeitnow.co.uk`): European board behind a Cloudflare "Just a moment…" page (bot: "No application
-  form found"). The URL slug carries the city (`…-london-220230`); UK / German employers → Mark skipped "non-US (<city>)". (2026-11-19)
+4. Submit only if the profile allows → confirmation (`bot-operate` script D) → row **Mark applied ✓** → Start.
 
 ## When a host repeats
 
 Handled the same host twice → create `site-<name>` from `templates/site-skill/` (`blocker-fix` §3).
-
-## arc.dev listings (2026-11-18)
-Aggregator, no adapter; the bot pauses on the listing ("No Next/Submit"). The page source carries
-`"requiredCountries":["ES"]` (ISO codes) — pre-check pending arc.dev rows with `fetch(<listing url>)` from the bot
-page and Remove rows without `US`. Apply link = `/remote-jobs/j/redirect/<id>` → employer / original board
-(if it lands on linkedin.com → rule 11, skip).
-
-## JazzHR (`*.applytojob.com`) — every form ends in a reCAPTCHA v2 checkbox (2026-11-18)
-The bot fills the form and pauses "A CAPTCHA is on the page"; its own apply tab is closed when the batch moves on.
-Routine: (1) read the bot's tab (ids `resumator-<field>-value`, questionnaire checkboxes `resumator-checkbox-<qid>-1|2`
-= No|Yes) and check the **Cover Letter textarea** — it can hold another row's letter (stale-letter bug) — and that
-the row's own letter isn't cut mid-sentence; (2) open the same URL (without utm) in the **work window**, set the text
-inputs by script (native setter + input/change), unhide `#resumator-resume-value` → `upload_file` → dispatch `change`,
-tick the Yes/No boxes the resume supports, EEO gender / race / veteran / disability = exact values from `profiles/<id>.md` (never "Decline to answer"; unknown → ask);
-(3) ask the user (`Q<n>`) to tick "I'm not a robot" + SUBMIT APPLICATION; (4) Start twice to move the batch on;
-(5) on "Q<n> done" verify the confirmation text in that tab, then **Mark applied**.
-
-## SuccessFactors career sites (`career8.successfactors.com`, e.g. NTT DATA `careers-inc.nttdata.com`) (2026-11-19)
-Job page **Apply now → Apply Now** → `careers?company=<id>` shows **Create an Account** with a "Please sign in" link
-(opens a Sign In dialog). Panel **Autofill** fills the dialog (and the create form behind it); click the dialog's
-**Sign In** by script (the snapshot uid goes stale). "Invalid email address or password" = older account →
-**Forgot your password?** → Password Help → Outlook "NTT DATA Password Reset" (search the company; the reset `<a>` is in
-the reading pane) → open it in the apply tab → panel Autofill fills both password boxes → Submit → "password has been
-updated successfully" → back to the job → Apply Now → sign in.
-The application is **one page**, prefilled from the candidate profile — including the **old resume / cover letter**
-from the last application: replace them (Resume "Edit document", Cover Letter "Delete document" → OK → "Attach a Cover
-Letter"; each opens "Upload from Device" = `upload_file` on that button). Yes/No + source dropdowns: click the
-combobox's sibling `button`, then mouse events on the `[role=option]` text. Date field takes `fill` "MM/DD/YYYY".
-Gender may come back empty → exact value (never "I Don't Wish To Answer"). NTT DATA asks **travel willingness + %**
-(Avash: Yes, 25 — `profiles/avash-chapagain.md`). **Apply** → the next page is blank (only "Back to Job Listings /
-View Profile"); confirm in **View Profile → Jobs Applied (n)** (row "Under Review", today's date) — the thank-you
-mail can lag. The panel shows "Auto-submit" on this host; its run stopped at Submit ("Reached Submit (apply)").

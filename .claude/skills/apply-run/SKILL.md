@@ -34,7 +34,7 @@ the Stop hooks relay to both. Terminal messages still work too.
 1. **Load from sheet** (`#loadSheetJobsBtn`) — the user's primary source; wait for `#status` to settle.
    Fallback only (keep it working): CSV upload of `jobs_latest.csv` via `.uploads/` when the capture
    tab lacks the wanted source (e.g. no Dice rows). Ask before switching a profile to CSV.
-2. Read per-source counts and the first ~10 pending rows (company / title / source).
+2. Read per-source counts and the first ~15 pending rows with `bot-operate` scripts A + B (no snapshot).
 3. **LinkedIn rows** (`linkedin.com` links, "LI" in the counts): never applied (CLAUDE.md rule 11).
    Offer to remove them with the row trash before Start so no generation time is spent on them.
 4. **Pre-check dry run (bot 2026-11-22):** from the bot page (read-only, nothing changes):
@@ -54,10 +54,12 @@ the Stop hooks relay to both. Terminal messages still work too.
 
 ## 3. Run — Batch mode "Generate + Apply"
 
-1. `#batchStart`. Poll `#status` / `#queueNowWorking` every 30–60 s (or the SW read in
-   `bot-operate`), update `cli.js status`, and act on any `[Mission Control]` messages (check the
-   Slack tab only as fallback, `slack-chat`).
-   Don't spam tools while ChatGPT is generating.
+1. `#batchStart`. Poll with **`bot-operate` script A only** (never `take_snapshot` / screenshot
+   to poll), update `cli.js status` only when the row or status changed, and act on any
+   `[Mission Control]` messages (Slack tab only as fallback, `slack-chat`).
+   **Pacing:** while a row is generating (ChatGPT/Codex), poll every 2–3 min — a build takes
+   minutes and each poll costs tokens; while the bot applies on an adapter site, 60 s. Sleep
+   between polls with `cli.js wait --timeout <s>` (a dashboard message wakes you early).
    **Order (bot 2026-11-22):** built rows first, then new builds, each by site tier — Workday,
    Greenhouse, Lever, Ashby, Dice, hosted Indeed / Jobgether, and the hand-off group (Builtin,
    Himalayas, Jobright, other employer pages) last. So the bot clears self-submit rows alone and the
@@ -72,9 +74,10 @@ the Stop hooks relay to both. Terminal messages still work too.
      bot submits, marks Applied, closes the tab, cools down, next row. Spot-check the first few.
    - **No adapter / blocker** → `#status` "Row N: … Batch paused". Then:
      1. `select_page` the apply tab; load the site skill by host (routing table in `site-other`).
-     2. Finish the form (aggregators: click through to the employer ATS); answers from
+     2. `bot-operate` script C (empty required fields, panel, CAPTCHA), then one snapshot to act.
+        Finish the form (aggregators: click through to the employer ATS); answers from
         profile / Q&A bank / user — never invented.
-     3. Submit (profile allows) → confirm the thank-you / "application received" page.
+     3. Submit (profile allows) → confirm the thank-you / "application received" page (`bot-operate` script D).
      4. Row **Mark applied ✓**.
      5. **Close the row's tabs** (rule 12): the apply tab plus any listing / ATS / verification
         tabs it opened (`close_page`). Never the bot window, ChatGPT, Outlook or dashboard tabs.
@@ -105,45 +108,10 @@ Start: the bot's backlog applies every `done` row from its saved folder (no new 
 self-submit sites first, hand-offs last. A row whose files already exist in its own folder is
 marked `done` instead of rebuilt.
 
-## 3c. Parallel mode — Avash + Lewis together (user, 2026-11-18; not field-tested yet)
+## 3c. Parallel mode — Avash + Lewis together
 
-> **ON HOLD (user, 2026-11-22): run Avash and Lewis one after the other.** Don't start `/bid both`
-> or two batches at once until the user re-enables it. Risks found 2026-11-22: every ChatGPT prompt
-> calls `focusTabForInput` (`chrome.windows.update(focused:true)` — the composer only accepts input
-> in the focused tab), so two generating profiles fight over the one foreground window; one RDP
-> session / one Chrome process freezes both at once; the Apps Script web app has no `LockService`.
-
-One Claude session, both bots running. Each profile's bot generates and auto-submits by itself;
-Claude alternates between them and finishes paused rows. Start with `/bid both <source> [cap]` or
-when the user says "both" / "together".
-
-1. **Preflight each profile in turn** (§1, §2): bind, settings from its own `profiles/<id>.md`, load,
-   queue review. Each queue gets its own "go" (rule 4); one may start while the other waits.
-2. **Keep a binding table** in working notes and in both run logs: person → bot page id, `sw-N`,
-   work-window id, ChatGPT tab id. Rebuild it after any MCP restart or extension reload.
-3. **Profile check before every action on a page** (rule 1): the page id must be in that person's
-   table, or be listed by that profile's bot page (`chrome.tabs.query({})` from the bot page,
-   read-only, lists only that profile's tabs). Not sure → don't click; re-bind (`browser-connect`).
-   On apply forms also check the name / email already on the form matches the person.
-4. **Loop:** poll Avash, poll Lewis (bot page `#status` or SW read), 30–60 s per round.
-   - Both running → status line only, no other tools.
-   - One paused → finish that row (site skill, answers from **that person's** profile file),
-     Mark applied, close that row's tabs (rule 12), `#batchStart`, then poll the other before
-     taking the next row.
-   - Both paused → oldest pause first. A row waiting on a user answer or a CAPTCHA → ask, leave the
-     tab open, and move to the other profile's row instead of waiting.
-5. **Never mix persons:** answers, resume / cover letter folder, Outlook tab, ATS account and the
-   Q&A bank are per person. Load the other person's profile file again when switching if unsure.
-6. **Tag everything with the person:** `cli.js status "Avash #24 … | Lewis #31 …"`, questions
-   `Q<n> (Lewis #31): …`, log lines go to that person's `runs/<date>-<id>.md`.
-7. **Bot code changes / `reload_extension`:** only when **both** batches are between rows (both
-   paused or idle); then reload both profiles, reload both ChatGPT tabs, re-bind both.
-8. **ChatGPT:** each profile's ChatGPT tab stays the active tab of its own window; each profile
-   gets its own separate work window for hand-work. Rate-limit / "too many requests" in either
-   profile → pause **one** batch (Lewis first) and continue with the other; tell the user.
-9. **Stop / Pause** from the dashboard applies to Claude as a whole. The bots keep going until
-   their own Pause/Stop is clicked — on Stop, report both bots' states in the final message.
-10. Stop conditions (§3.4) are counted per profile; one profile stopping doesn't stop the other.
+**ON HOLD (user, 2026-11-22): run them one after the other.** Procedure and risks → `parallel.md`
+in this folder; read it only if the user re-enables `/bid both`.
 
 ## 4. Verify
 
