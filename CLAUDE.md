@@ -73,6 +73,9 @@ Person data comes from the bot (built-in `profiles.js` or the custom copy in tha
    **Mailbox (user, 2026-11-16, terminal, standing):** Claude may read the person's own **Outlook tab**
    (Avash, Lewis) to find and click verification links / codes, and to check "already applied?" for
    a company before an account wall. Never send, reply, delete, or move mail. See `slack-chat`.
+   **Chrome's "Allow remote debugging?" prompt (user, 2026-11-22):** always clicked automatically
+   by the logon task `BidBotAllowRemoteDebugging` (`scripts/allow-remote-debugging.ps1 -Watch`);
+   never ask the user to click it (`browser-connect` → Connect).
    **Only CAPTCHA goes to the user (user, 2026-11-19):** login walls, sign-ups, email verification
    links / codes and password resets via the Outlook link → Claude handles them itself (panel
    Autofill for credentials, Outlook tab for links / codes) without asking. CAPTCHA, or anything

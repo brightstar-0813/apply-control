@@ -11,8 +11,8 @@ Since 2026-11-18 `.mcp.json` starts it with `node` from a **global install**
 (`npm i -g chrome-devtools-mcp@1.13.0`, ~3 s), not `npx` (npx resolution hit Claude Code's 30 s
 MCP connect timeout in dashboard runs → "chrome-devtools CONNECT_TIMEOUT", no browser tools).
 Every **new** MCP process (each headless dashboard run) triggers Chrome's "Allow remote
-debugging?" prompt again; **click Allow yourself** with `scripts/allow-remote-debugging.ps1`
-(user standing OK, 2026-11-21) — see Connect.
+debugging?" prompt again; it is **clicked automatically** by the always-on watcher task
+`BidBotAllowRemoteDebugging` (user, 2026-11-22: "always click it whenever it appears") — see Connect.
 
 ## Facts on this machine
 
@@ -26,19 +26,24 @@ debugging?" prompt again; **click Allow yourself** with `scripts/allow-remote-de
 
 ## Connect
 
-1. On a new connection Chrome shows **"Allow remote debugging?"**. Claude clicks **Allow** itself
-   (user, 2026-11-21: "whenever we face this, click Allow automatically" — no `Q<n>`):
-   start the watcher in the background, then make the first chrome-devtools call in the same turn:
-   ```powershell
-   powershell -NoProfile -ExecutionPolicy Bypass -File scripts\allow-remote-debugging.ps1 -TimeoutSec 90   # run_in_background
-   ```
-   then `list_pages`. The script (UI Automation) presses only a button named "Allow" in a Chrome
-   dialog whose text contains "remote debugging"; prints `clicked` / `not-found`. Worked first
-   time 2026-11-21. It covers this prompt only, no other Chrome permission dialog.
-2. Timeout "waiting for the browser connection" = dialog pending. `DevToolsActivePort` in the
-   User Data dir + a `node.exe` connection on 9222 confirm it. Run the watcher again and retry
-   (max two). `not-found` twice → check `qwinsta` (UI Automation needs the RDP session attached,
-   not `Disc`), then ask the user (`Q<n>`) to click it / reconnect.
+1. On a new connection Chrome shows **"Allow remote debugging?"**. It is clicked without anyone
+   asking (user, 2026-11-21 / 11-22: "always click Allow whenever it appears" — never a `Q<n>`):
+   - **Always-on watcher**: logon task `BidBotAllowRemoteDebugging` runs
+     `scripts\allow-remote-debugging.ps1 -Watch` in the user's session (scan every 1.5 s, one
+     instance, clicks logged to `runs\.allow-remote-debugging.log`). Installed with
+     `scripts\install-allow-task.ps1`. Tested 2026-11-22: a brand-new MCP process got
+     `list_pages` back in 4.6 s. So normally just call `list_pages`.
+   - The script (UI Automation) presses only a button named "Allow" in a Chrome dialog whose
+     text contains "remote debugging". It covers this prompt only, no other Chrome dialog.
+2. Timeout "waiting for the browser connection" = dialog pending, i.e. the watcher is not doing
+   its job. Check, in this order, then retry (max two):
+   - task running? `Get-ScheduledTask BidBotAllowRemoteDebugging` → not Running →
+     `Start-ScheduledTask BidBotAllowRemoteDebugging` (missing → run `install-allow-task.ps1`);
+   - log tail (`runs\.allow-remote-debugging.log`): `invoke-failed` / `error:` lines;
+   - one shot by hand: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\allow-remote-debugging.ps1 -TimeoutSec 60`
+     in the background, then `list_pages` (prints `clicked` / `not-found`);
+   - `qwinsta`: the watcher lives in the user's logon session; no session (logged off / rebooted
+     without logon) → nothing can click → ask the user (`Q<n>`) to log on.
 3. After the MCP server restarts, page ids and `sw-N` change and the old snapshot is gone —
    `list_pages` + `take_snapshot` again before any `click`/`fill`.
 
@@ -115,7 +120,7 @@ Never write storage or send state-changing messages (CLAUDE.md rule 2).
 
 | Symptom | Do |
 |---------|----|
-| Timeout waiting for browser connection | Allow dialog pending — see Connect §2 |
+| Timeout waiting for browser connection | Allow dialog pending = watcher task `BidBotAllowRemoteDebugging` not running — see Connect §2 |
 | "No snapshot found for page N" | MCP restarted / page reloaded → `take_snapshot` first |
 | Generation stuck on "blank ChatGPT chat ready — sending resume" after an extension reload | The AI tab still runs the old (orphaned) content script → reload that ChatGPT tab; the bot continues. **Always reload the AI tab right after reloading the extension** (2026-11-16) |
 | Generation stalls at "sending resume" / "poll timed out (harvest too slow)", `evaluate_script` on the ChatGPT tab times out | **The ChatGPT tab is not the active tab of its window** (a work tab opened with `chrome.exe --profile-directory … <url>` or activated with `select_page bringToFront` took its place → Chrome throttles it). Keep hand-work tabs in a **separate window**: from the bot page `chrome.windows.create({tabId, focused:false})`, then `chrome.tabs.update(<chatgpt tab>, {active:true})`. If it is already frozen: `chrome.tabs.reload(<chatgpt tab id>)` from the bot page, the row continues (2026-11-18) |
