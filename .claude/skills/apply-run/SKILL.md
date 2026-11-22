@@ -63,9 +63,10 @@ the Stop hooks relay to both. Terminal messages still work too.
    Himalayas, Jobright, other employer pages) last. So the bot clears self-submit rows alone and the
    hand-off pauses come together at the end. Old order: storage `batch_priority_order = "queue"`
    (user decision only).
-   **Screening questions go to Codex only** (no GPT-tab fallback); the GPT tab is for resumes and
-   cover letters. A Codex failure retries once on a new thread, then the row pauses as "required
-   field unanswered".
+   **Screening questions: Codex first.** A Codex failure retries once on a new thread, then falls
+   back to the GPT tab as before; the OpenAI API key path (assist toggle + key) and the `chatgpt`
+   engine stay available — never remove those methods (user, 2026-11-22). Still unanswered → the
+   row pauses as "required field unanswered".
 2. Per row the bot builds files, then opens the job and autofills:
    - **Adapter site** (Dice, Greenhouse, Workday, Lever, Ashby, Jobgether, hosted Indeed):
      bot submits, marks Applied, closes the tab, cools down, next row. Spot-check the first few.
