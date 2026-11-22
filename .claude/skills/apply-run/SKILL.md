@@ -37,10 +37,19 @@ the Stop hooks relay to both. Terminal messages still work too.
 2. Read per-source counts and the first ~10 pending rows (company / title / source).
 3. **LinkedIn rows** (`linkedin.com` links, "LI" in the counts): never applied (CLAUDE.md rule 11).
    Offer to remove them with the row trash before Start so no generation time is spent on them.
-4. Show the user; flag obvious misfits (wrong track, non-US, duplicates) and offer to remove them.
-5. **New CSV / sheet load:** check pending rows have no `jobDir` from an older CSV (row numbers
+4. **Pre-check dry run (bot 2026-11-22):** from the bot page (read-only, nothing changes):
+   `() => chrome.runtime.sendMessage({ type: "precheck_queue", dryRun: true })` → rows the bot will
+   skip at Start (closed / non-US / state residency vs the person's state / required relocation),
+   plus `groups` (self-submit vs hand-off counts). Include it in the queue review. At **Start** the
+   bot marks those rows skipped (reason in the row, `precheck_log` in storage; nothing deleted) and
+   also skips, row by row, same-requisition / same-employer-and-title reposts of applied or built rows.
+   A wrong skip → `precheck_restore` with `csvRow` is a state change: only on the user's say-so.
+5. Show the user; flag obvious misfits (wrong track, non-US, duplicates) and offer to remove them.
+6. **New CSV / sheet load:** check pending rows have no `jobDir` from an older CSV (row numbers
    get reused; fixed in the bot 2026-11-15, still verify) and that Autofill is still on.
-6. **Wait for "go"** unless the profile pre-approves. Cap = profile value (default 25); for a
+   (Hydration still points reposts at another row's folder by company + title — e.g. 11-22 rows
+   218/254 → row 47's folder. The bot's reuse step ignores those; only own-row folders are reused.)
+7. **Wait for "go"** unless the profile pre-approves. Cap = profile value (default 25); for a
    first run on a profile/build, start with 3 and watch each one.
 
 ## 3. Run — Batch mode "Generate + Apply"
@@ -49,6 +58,14 @@ the Stop hooks relay to both. Terminal messages still work too.
    `bot-operate`), update `cli.js status`, and act on any `[Mission Control]` messages (check the
    Slack tab only as fallback, `slack-chat`).
    Don't spam tools while ChatGPT is generating.
+   **Order (bot 2026-11-22):** built rows first, then new builds, each by site tier — Workday,
+   Greenhouse, Lever, Ashby, Dice, hosted Indeed / Jobgether, and the hand-off group (Builtin,
+   Himalayas, Jobright, other employer pages) last. So the bot clears self-submit rows alone and the
+   hand-off pauses come together at the end. Old order: storage `batch_priority_order = "queue"`
+   (user decision only).
+   **Screening questions go to Codex only** (no GPT-tab fallback); the GPT tab is for resumes and
+   cover letters. A Codex failure retries once on a new thread, then the row pauses as "required
+   field unanswered".
 2. Per row the bot builds files, then opens the job and autofills:
    - **Adapter site** (Dice, Greenhouse, Workday, Lever, Ashby, Jobgether, hosted Indeed):
      bot submits, marks Applied, closes the tab, cools down, next row. Spot-check the first few.
@@ -81,7 +98,19 @@ the Stop hooks relay to both. Terminal messages still work too.
 The bot only builds files. If the user wants applications anyway, use each done row's **Apply**
 (note: non-hosted rows are marked Applied when opened), run the Autofill panel, submit only if allowed.
 
+**Generate ahead, apply later (user OK 2026-11-22):** run the whole queue in **Generate** (e.g.
+overnight; pre-check and duplicate skips run here too), then switch to **Generate + Apply** and
+Start: the bot's backlog applies every `done` row from its saved folder (no new ChatGPT build),
+self-submit sites first, hand-offs last. A row whose files already exist in its own folder is
+marked `done` instead of rebuilt.
+
 ## 3c. Parallel mode — Avash + Lewis together (user, 2026-11-18; not field-tested yet)
+
+> **ON HOLD (user, 2026-11-22): run Avash and Lewis one after the other.** Don't start `/bid both`
+> or two batches at once until the user re-enables it. Risks found 2026-11-22: every ChatGPT prompt
+> calls `focusTabForInput` (`chrome.windows.update(focused:true)` — the composer only accepts input
+> in the focused tab), so two generating profiles fight over the one foreground window; one RDP
+> session / one Chrome process freezes both at once; the Apps Script web app has no `LockService`.
 
 One Claude session, both bots running. Each profile's bot generates and auto-submits by itself;
 Claude alternates between them and finishes paused rows. Start with `/bid both <source> [cap]` or
