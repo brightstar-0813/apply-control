@@ -23,8 +23,11 @@ the Stop hooks relay to both. Terminal messages still work too.
 1. `browser-connect` → bound bot page, right person, current build (`#batchModeApply` exists).
 2. Match the bot to the profile file, clicking like the user would:
    Allow batch process = Yes · Load from = Google Sheet · Jobs sheet URL + **Save URL** ·
-   Capture tab · source filter · **Batch mode** · **Allow auto submit** · Autofill on · AI engine.
+   Capture tab · source filter · **Batch mode** · **Allow auto submit** · Autofill on · AI engine ·
+   **Resume style** (`#templateSelect` via `#templatePickerTrigger` + accent `#templateAccentSwatches`).
    Never turn submit on unless the profile file / user says so.
+   **Resume style once per session, before Load / Start (user, 2026-11-22):** read the current
+   template + accent; profile file has a value → set it; none → ask the user, then record it.
 3. `?` fields in the profile file → ask the user once, then write the answer into the file.
 4. AI tab: the bot opens one if missing; a login page → ask the user.
 5. Baseline counters (QUEUE / DONE / APPLIED / PENDING / SKIPPED / ERROR).
@@ -95,6 +98,10 @@ the Stop hooks relay to both. Terminal messages still work too.
    "already applied <date>". While paused, also remove pending repeats / non-US rows (Remove is disabled while running).
    **Skip only at a pause**: `#batchSkip` during generation leaves the ChatGPT chat on the skipped job and the next row's
    cover letter can fail (#266).
+   **Parking a paused row mid-form** (waiting on a `Q<n>`): `#batchSkip` then `#batchStart` does **not** move on —
+   Start resets the skip flag and re-runs the paused row first, navigating its tab away (Workday step answers not yet
+   saved are lost; #163, 2026-11-22). Use the row's **Mark skipped** ("On hold - … Q<n>") and then Start; finish the
+   row by hand after the answer and **Mark applied**.
 4. Stop and tell the user on: cap reached, rate-limit / CAPTCHA storms, the same failure 3× on one site.
 
 ## 3b. Run — Batch mode "Generate"
