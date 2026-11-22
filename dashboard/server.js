@@ -76,7 +76,7 @@ function pingApproval(id, label, sum) {
 }
 
 // ---------- bot bridge ----------
-const bots = createBots({ onEvent: (e) => addEvent(e) });
+const bots = createBots({ onEvent: (e) => addEvent(e), store: db });
 let botsPushTimer = null;
 function throttledBotsPush() {
   if (botsPushTimer) return;

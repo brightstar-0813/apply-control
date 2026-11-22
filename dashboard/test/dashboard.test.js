@@ -168,3 +168,18 @@ test('bots: sync, commands, results, person allowlist, LinkedIn refused', () => 
   assert.equal(bots.list()[0].commands[0].status, 'done');
   assert.ok(events.some((e) => /Loaded 22 jobs/.test(e.summary)));
 });
+
+test('bots: resume builds counted per day, queue reloads only re-base', () => {
+  const { createBots } = require('../lib/bots');
+  const kv = new Map(); const store = { get: (k, d) => (kv.has(k) ? JSON.parse(kv.get(k)) : d), set: (k, v) => kv.set(k, JSON.stringify(v)) };
+  let t = new Date(2026, 10, 22, 9, 0).getTime();
+  const bots = createBots({ onEvent: () => {}, store, clock: () => t });
+  const sync = (queue, built) => bots.sync({ botId: 'abc123-window', state: { person: 'avash-chapagain', counters: { queue, built } } });
+  sync(10, 2); assert.deepEqual([bots.list()[0].built.today, bots.list()[0].built.lastBuiltAt], [0, null]); // first sight: baseline only
+  t += 60e3; sync(10, 3); assert.equal(bots.list()[0].built.today, 1); assert.equal(bots.list()[0].built.lastBuiltAt, t);
+  t += 60e3; sync(25, 9); assert.equal(bots.list()[0].built.today, 1); // Load from sheet: no fake builds
+  t += 60e3; sync(25, 11); assert.equal(bots.list()[0].built.today, 3);
+  const again = createBots({ onEvent: () => {}, store, clock: () => t }); // server restart keeps today's count
+  again.sync({ botId: 'abc123-window', state: { counters: { queue: 25, built: 11 } } }); assert.equal(again.list()[0].built.today, 3);
+  t = new Date(2026, 10, 23, 8, 0).getTime(); sync(25, 11); assert.equal(bots.list()[0].built.today, 0); // new day
+});

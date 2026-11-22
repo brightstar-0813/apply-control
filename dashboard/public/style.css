@@ -140,7 +140,7 @@ input:focus, textarea:focus, select:focus { outline: 2px solid var(--accent); ou
 .bot h3 { font-size: 13px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); margin: 14px 0 6px; }
 .dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--bad); vertical-align: middle; }
 .dot.on { background: var(--ok); }
-.ctrs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin: 8px 0; }
+.ctrs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin: 8px 0; }
 .ctr { background: var(--surface-2); border-radius: 8px; padding: 6px 8px; text-align: center; }
 .ctr b { display: block; font-size: 18px; font-variant-numeric: tabular-nums; }
 .ctr span { font-size: 11px; color: var(--muted); text-transform: uppercase; }
@@ -226,7 +226,7 @@ input:focus, textarea:focus, select:focus { outline: 2px solid var(--accent); ou
 
 /* stat tiles */
 .tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 0 0 12px; }
-@media (min-width: 760px) { .tiles { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+@media (min-width: 760px) { .tiles { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
 .tile { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; box-shadow: var(--shadow); min-width: 0; }
 .tile .tl { display: block; font-size: 11.5px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
 .tile b { display: block; font-size: 28px; line-height: 1.25; font-weight: 600; font-variant-numeric: tabular-nums; }

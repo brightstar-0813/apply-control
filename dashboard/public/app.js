@@ -280,18 +280,24 @@
     if (!state) return;
     const need = state.openQuestions.length + state.pendingApprovals.length;
     const tile = (cls, label, v, note) => `<div class="tile ${cls}"><span class="tl">${label}</span><b>${v}</b><span class="tn">${esc(note || '')}</span></div>`;
-    const t = { applied: 0, todo: 0, queue: 0, error: 0 };
+    const t = { applied: 0, todo: 0, queue: 0, error: 0, built: 0, today: 0, last: 0 };
+    const ago = (ts) => { const m = Math.round((Date.now() - ts) / 60e3); return m < 1 ? 'just now' : m < 60 ? `${m} min ago` : m < 1440 ? `${Math.floor(m / 60)} h ${m % 60} min ago` : `${Math.floor(m / 1440)} d ago`; };
     const sections = botsData.map((b) => {
       const s = b.state || {}; const c = s.counters || {};
       const name = String(b.label || b.person || 'Bot');
       const todo = (c.pending || 0) + (c.running || 0); const err = c.error || 0;
+      const bu = b.built || {}; const last = bu.lastBuiltAt || 0;
+      // running batch with no new resume for 30+ min → something may be stuck
+      const stale = s.batch && s.batch.running && todo > 0 && (!last || Date.now() - last > 30 * 60e3);
+      const builtNote = `${bu.today || 0} today · ${last ? 'last ' + ago(last) : 'none seen yet'}`;
       t.applied += c.applied || 0; t.todo += todo; t.queue += c.queue || 0; t.error += err;
+      t.built += (c.built ?? c.done) || 0; t.today += bu.today || 0; t.last = Math.max(t.last, last);
       const rows = s.rows || []; const total = s.rowsTotal || rows.length;
       const profile = b.profile || b.chromeProfile || '';
       return `<section class="prof" aria-label="${esc(name)}">` +
         `<div class="prof-head"><h2>${esc(name)} <span class="dot ${b.online ? 'on' : ''}" title="${b.online ? 'online' : 'offline'}"></span></h2>` +
         `${profile ? `<span class="muted small">${esc(profile)}</span>` : ''}</div>` +
-        `<div class="tiles">${tile('ok', 'Submitted', c.applied || 0)}${tile(err ? 'warn' : '', 'Errors', err)}` +
+        `<div class="tiles">${tile(stale ? 'warn' : 'info', 'Resumes built', c.built ?? c.done ?? '–', builtNote)}${tile('ok', 'Submitted', c.applied || 0)}${tile(err ? 'warn' : '', 'Errors', err)}` +
         `${tile('', 'To do', todo)}${tile('info', 'Tracked', c.queue || 0)}</div>` +
         (rows.length ? `<div class="grid2">${table('Job board', rows, boardOf)}${table('Application system', rows, atsOf)}` +
           (rows.length < total ? `<p class="muted small span2">Tables cover the ${rows.length} of ${total} rows this bot shares (active rows first); the tiles count every row.</p>` : '') +
@@ -299,7 +305,7 @@
         '</section>';
     });
     $('tiles').innerHTML = botsData.length
-      ? `<p class="totals">All profiles: <b class="ok">${t.applied}</b> submitted · <b>${t.todo}</b> to do · <b>${t.queue}</b> tracked` +
+      ? `<p class="totals">All profiles: <b>${t.built}</b> resumes built (<b>${t.today}</b> today${t.last ? ', last ' + ago(t.last) : ''}) · <b class="ok">${t.applied}</b> submitted · <b>${t.todo}</b> to do · <b>${t.queue}</b> tracked` +
         `${t.error ? ` · <b class="bad">${t.error}</b> errors` : ''} · <b class="${need ? 'warn' : ''}">${need}</b> need${need === 1 ? 's' : ''} you</p>`
       : `<p class="totals muted">Open the bot window to see queue numbers.${need ? ` ${need} item${need === 1 ? '' : 's'} need you.` : ''}</p>`;
     $('breakdown').innerHTML = sections.join('');
@@ -374,7 +380,7 @@
     }
     $('botsList').innerHTML = botsData.map((b) => {
       const s = b.state || {}; const id = b.botId; const c = s.counters || {}; const bt = s.batch || {};
-      const counters = ['queue', 'pending', 'done', 'applied', 'skipped', 'error'].map((k) => `<div class="ctr"><b>${esc(c[k] ?? '–')}</b><span>${k}</span></div>`).join('');
+      const counters = ['queue', 'pending', 'built', 'done', 'applied', 'skipped', 'error'].map((k) => `<div class="ctr"><b>${esc(c[k] ?? '–')}</b><span>${k}</span></div>`).join('');
       const rows = (s.rows || []).map((r) => `<li class="qrow">
           <div class="qmain"><b>#${esc(r.row)}</b> ${esc(r.company || '')} <span class="muted">· ${esc(r.title || '')}</span>
             <div class="muted small">${esc(r.source || '')} · <span class="st st-${esc(String(r.status || '').toLowerCase().replace(/\W+/g, '-'))}">${esc(r.status || '')}</span>${r.link ? ` · <a href="${esc(r.link)}" target="_blank" rel="noopener noreferrer">job</a>` : ''}</div></div>
