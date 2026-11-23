@@ -25,6 +25,7 @@ description: How to apply on Indeed (indeed.com, smartapply.indeed.com) with Bri
 | Required screener with no Q&A match | A | Answer truthfully / ask; save to Q&A bank | 2026-11-13 |
 | External link | P/N | Bot never submits; Claude finishes on employer ATS if allowed | 2026-11-14 |
 | SmartApply opens straight at **Review** with the resume Indeed stored from an earlier application; "Edit resume" / "Add supporting documents" in the review preview frame don't respond and `/form/resume-selection-module/...` redirects back to review | P | The stored file is still the person's real resume → submit with it (log it). Confirmation = "has been submitted!" on `/form/post-apply` (C.A.S.E. #149, Avash) | 2026-11-23 |
+| SmartApply employer questions: `fill_form` text doesn't persist (React) | P | Set textareas / text inputs with the native value setter + `InputEvent('input')` + change + blur; some "describe…" questions are `<input>` not `<textarea>`. Custom selects (Ethnic Background) = click → clear the search box → click the option. Review page can carry a **visible reCAPTCHA** that keeps Submit disabled → human (`Q<n>`), park the row (Fathom #203) | 2026-11-23 |
 
 ## Notes
 - Keep Indeed volume low and slow — rapid activity triggers anti-automation.
