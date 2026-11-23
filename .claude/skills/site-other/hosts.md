@@ -137,6 +137,7 @@ before Submit Application** → human-only: fill everything else, leave the tab 
 blackfinconsult (2026-11-17): **Skill Set is required** — "Search and add skills", type "Salesforce", click the chip;
 most jobs have Next → an "Assessment" step after the CAPTCHA. Job ids + titles are in the careers page's hidden `input`
 JSON (`Posting_Title`, `id`); salary only on the job page.
+xnrsolutions (2026-11-23, Avash #87): ZIP / City / State comboboxes and Skill Set lose focus with `click`+`type_text` (text goes nowhere) → use `fill` on the inner textbox; Skill Set: `fill` "Salesforce" then scripted mousedown/mouseup/click on the `li` "Salesforce" (chip appears). Required here: name, email, mobile, Country, Skill Set, **LinkedIn**, CAPTCHA. Resume input `rec-form_<id>_file` is hidden → unhide via style, then `upload_file`.
 
 ## SuccessFactors (`career8.successfactors.com`, e.g. NTT DATA `careers-inc.nttdata.com`)
 (2026-11-19) Job page **Apply now → Apply Now** → `careers?company=<id>` shows **Create an Account** with a "Please sign
