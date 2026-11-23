@@ -176,3 +176,9 @@ finds nothing) — read/fill them from `take_snapshot` uids. `fill_form` works f
 LinkedIn; resume = `upload_file` on the second "Choose a file" button (the first is the autocomplete parser). DATASYS
 (2026-11-23, Avash #88): the upload triggered **DataDome** ("You have been blocked", `geo.captcha-delivery.com`) +
 "Cannot upload resume" → bot protection = human-only: alert (`Q<n>` + screenshot), leave the tab, park the row.
+
+## iCIMS (`careers-<tenant>.icims.com`)
+Job page `/jobs/<id>/<slug>/job`; the form lives in `iframe#icims_content_iframe` (same-origin: read it via
+`contentDocument`). Apply = `/jobs/<id>/<slug>/login` → Email + "I accept" → Next. Granicus (2026-11-23, Avash #95):
+Next opened an **hCaptcha** challenge (320×400 iframe inside the content iframe) → human-only: `Q<n>` + screenshot, leave
+the tab, park the row. Reyes (#91): iCIMS shows the real location ("US-IL-Rosemont") even when Himalayas says remote.
