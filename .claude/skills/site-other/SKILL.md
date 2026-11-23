@@ -47,3 +47,11 @@ Never load the whole file. Add new single-sighting notes there as a `## Name (ho
 ## When a host repeats
 
 Handled the same host twice → create `site-<name>` from `templates/site-skill/` (`blocker-fix` §3).
+
+## ADP Workforce Now recruiting (`myjobs.adp.com` → `recruiting.adp.com/srccar`) — added 2026-11-23
+Email → 6-digit code (Outlook "Here's your verification code from ADP") → privacy dialog **Agree** → wizard.
+Next = round blue arrow `.appGo` (scripted mousedown/mouseup/click). Dojo dropdowns = `table[id^=uniqName]`:
+click it, then the item inside `<id>_menu`. An **"Errors Found"** dialog (`.dojoxDialogCloserIcon`) swallows
+typing until closed; `fill` works on text boxes once it is closed. Preliminary questions appear one at a time
+(click the LAST Yes/No). The application form needs at least the current employer, education and the
+e-signature (name + Accept). Done = "Thank you! We have all the information we need … Req <n>". (SCA #60, Avash)
