@@ -169,3 +169,10 @@ any profile → Mark skipped "needs references + emergency contact" (user 2026-1
 ## arbeitnow (`arbeitnow.com`, `arbeitnow.co.uk`)
 European board behind a Cloudflare "Just a moment…" page (bot: "No application form found"). The URL slug carries the
 city (`…-london-220230`); UK / German employers → Mark skipped "non-US (<city>)". (2026-11-19)
+
+## SmartRecruiters (`jobs.smartrecruiters.com/oneclick-ui/...`)
+Built In "APPLY" can land on the **oneclick** Easy Apply page. Fields are in shadow DOM (`document.querySelectorAll`
+finds nothing) — read/fill them from `take_snapshot` uids. `fill_form` works for name / email / confirm email / phone /
+LinkedIn; resume = `upload_file` on the second "Choose a file" button (the first is the autocomplete parser). DATASYS
+(2026-11-23, Avash #88): the upload triggered **DataDome** ("You have been blocked", `geo.captcha-delivery.com`) +
+"Cannot upload resume" → bot protection = human-only: alert (`Q<n>` + screenshot), leave the tab, park the row.
