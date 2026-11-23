@@ -55,3 +55,14 @@ click it, then the item inside `<id>_menu`. An **"Errors Found"** dialog (`.dojo
 typing until closed; `fill` works on text boxes once it is closed. Preliminary questions appear one at a time
 (click the LAST Yes/No). The application form needs at least the current employer, education and the
 e-signature (name + Accept). Done = "Thank you! We have all the information we need … Req <n>". (SCA #60, Avash)
+
+### ADP Workforce Now careers (`workforcenow.adp.com/mascsr/.../recruitment.html`) — added 2026-11-23
+Different from `recruiting.adp.com`. Built In "APPLY" (`?handler=ApplyRedirect`) lands here. **Apply** →
+first/last/email/mobile → Continue → pick the **email** radio → Send → 6-digit code from Outlook → Verify.
+Steps: Personal Information → Resume (+ Attachments = cover letter) → Questions → Voluntary Self-ID → Review →
+Self-Attest & Submit. Pitfalls: choosing **Country** (combobox: type "United States", click the option)
+**clears Address/City/Zip/County** — refill after, then State button → "VA - Virginia". Desired salary needs
+the **currency** button → "United States Dollar ( USD )" or Next fails. Cert questions are multi-select (reopen
+the combobox per pick; unlisted certs → "Other Salesforce certification"). Self-ID may be prefilled from an
+earlier ADP profile — verify, never tick "I decline". Final step: e-sign checkbox **and** typed full name.
+Done = "Thank You! We have received your application." (Tripoint #75, Avash)
